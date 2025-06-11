@@ -26,6 +26,11 @@
                 if (!formData || typeof formData !== 'object') {
                 throw new Error('Invalid form data.');
                 }
+                // Include the value of the clicked button in the form data
+                const actionButton = event.target;
+                if (actionButton && actionButton.name && actionButton.value) {
+                formData[actionButton.name] = actionButton.value;
+                }
                 for (const key in formData) {
                 if (formData.hasOwnProperty(key)) {
                     const input = document.createElement('input');
@@ -51,7 +56,11 @@
                 const formData = {};
                 const inputs = form.querySelectorAll('input, select, textarea');
                 inputs.forEach(input => {
-                if (input.name) {
+                if (input.type === 'radio') {
+                    if (input.checked) {
+                    formData[input.name] = input.value;
+                    }
+                } else if (input.name) {
                     formData[input.name] = input.value;
                 }
                 });
