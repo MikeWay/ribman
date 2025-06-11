@@ -22,30 +22,19 @@ export class IndexController {
         'page3': 'page1' // Loop back to page1
     };
     public getHome(req: Request, res: Response): void {
-        //res.send('Welcome to the Home Page');
-        this.getPage1(req, res);
+        res.locals.pageBody = 'page1';
+        // render the page1 view with the usernames 
+        res.render('index', { title: 'Page 1' });
     }
 
     public getAbout(req: Request, res: Response): void {
         res.send('This is the About Page');
     }
 
-
-    public getPage1(req: Request, res: Response): void {
-        req.session.pageBody = 'page1'; // Set the initial pageBody in session
-        // create a list of usernames
-        const usernames = ['user1', 'user2', 'user3'];
-        // pass the usernames to the view
-        res.locals.usernames = usernames;
-        // pass "page1" to the view
-        res.locals.pageBody = 'page1';
-        // render the page1 view with the usernames 
-        res.render('index', { title: 'Page 1' });
-    }
-        
+       
     public navigate(req: Request, res: Response): void {
         const currentPage = req.session.pageBody || 'page1';
-        const action = req.query.action as string || 'next';
+        const action = req.method === 'POST' ? req.body.action as string : req.query.action as string || 'next';
 
         let targetPage: string;
 
@@ -55,9 +44,9 @@ export class IndexController {
             ) || 'page1';
         } else {
             targetPage = this.pageTransitions[currentPage] || 'page1';
-            this.processForm_PrepNextPage(req, res, currentPage, targetPage);
+            
         }    
-
+        this.processForm_PrepNextPage(req, res, currentPage, targetPage);
         req.session.pageBody = res.locals.pageBody = targetPage;
 
         res.render('index', { title: `${action === 'previous' ? 'Previous' : 'Next'} Page: ${targetPage}` });
