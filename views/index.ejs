@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/styles.css"> <!-- Link to the custom CSS file -->
+</head>
+<body class="container mt-5">
+    <h1 class="text-center">Welcome to the Application</h1>
+    <%- include(pageBody) %>
+    <form action="/navigate" method="POST" class="d-flex justify-content-center gap-2 mt-4">
+        <button type="submit" name="action" value="previous" class="btn btn-primary">Previous</button>
+        <button type="submit" name="action" value="next" class="btn btn-success" onclick="addFormData(event)">Next</button>
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='/'">Home</button>
+        <script>
+            function addFormData(event) {
+            try {
+                event.preventDefault();
+                const form = event.target.closest('form');
+                if (!form) {
+                throw new Error('Form element not found.');
+                }
+                const formData = getFormData();
+                if (!formData || typeof formData !== 'object') {
+                throw new Error('Invalid form data.');
+                }
+                for (const key in formData) {
+                if (formData.hasOwnProperty(key)) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = formData[key];
+                    form.appendChild(input);
+                }
+                }
+                form.submit();
+            } catch (error) {
+                console.error('Error in addFormData:', error.message);
+                alert('An error occurred while processing the form. Please try again.');
+            }
+            }
+
+            function getFormData() {
+            try {
+                const form = document.getElementById('theForm');
+                if (!form) {
+                throw new Error('Form with ID "theForm" not found.');
+                }
+                const formData = {};
+                const inputs = form.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                if (input.name) {
+                    formData[input.name] = input.value;
+                }
+                });
+                return formData;
+            } catch (error) {
+                console.error('Error in getFormData:', error.message);
+                alert('An error occurred while retrieving form data.');
+                return null;
+            }
+            }
+        </script>
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> <!-- Bootstrap JS -->
+</body>
+</html>

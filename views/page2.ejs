@@ -1,0 +1,14 @@
+<h1>Page 2</h1>
+<form id="theForm">
+    <div>
+        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">        
+        <% locals.boats.forEach(function(boat) { %>
+            <div>
+                <input type="radio" id="<%= boat.id %>" name="boat" value="<%= boat.id %>" class="btn-check" />
+                <label class="btn btn-outline-primary" for="<%= boat.id %>"><%= boat.name %></label>
+                
+            </div>
+        <% }); %>
+        </div>
+    </div>
+</form>
