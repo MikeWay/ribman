@@ -74,6 +74,11 @@ export class IndexController {
                 console.log('Processing form data for page2');
                 this.preparePage2(req, res);
                 break;
+            case 'page3':
+                // Process form data for page3 if needed
+                console.log('Processing form data for page3');
+                this.preparePage3(req, res);
+                break;
     }}
     public preparePage2(req: Request, res: Response): void {
         // build a list of boats with name and id and pass it to the view
@@ -88,6 +93,17 @@ export class IndexController {
 
     }
 
+    public preparePage3(req: Request, res: Response): void {
+        // build a list of people with name and id and pass it to the view
+        const people = [
+            { id: 1, name: 'John Doe' },
+            { id: 2, name: 'Jane Smith' },
+            { id: 3, name: 'Alice Johnson' },
+            { id: 4, name: 'Bob Brown' }
+        ];
+        res.locals.people = people;
+        res.locals.pageBody = 'page3';
+    }
 }
 
 

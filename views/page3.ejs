@@ -1,1 +1,8 @@
-Page3 Body
+<form  id="theForm" >
+    <label for="person">Select a person:</label>
+    <select id="person" name="person">
+        <% locals.people.forEach(function(person) { %>
+            <option value="<%= person.id %>"><%= person.name %></option>
+        <% }); %>
+    </select>
+</form>
