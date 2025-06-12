@@ -25,9 +25,9 @@ export class IndexController {
 
     private pageTransitionsCheckIn: { [key: string]: string } = {
         'page1': 'startCheckIn',
-        'startCheckIn': 'checkInComplete', // Start Check-In page
+        'startCheckIn': 'recordEngineHours',    
+        'recordEngineHours': 'checkInComplete', // Record Engine Hours page
         'checkInComplete': 'page1', // Check-In Complete page
-
     };
 
     public getHome(req: Request, res: Response): void {
@@ -84,7 +84,20 @@ export class IndexController {
                 console.log('Preparing data for page3');
                 this.preparePage3(req, res);
                 break;
+            case 'startCheckIn':
+                // Prepare data for the start of the check-in process
+                console.log('Preparing data for startCheckIn');
+                this.prepareCheckinPage(req, res);
+                res.locals.pageBody = 'startCheckIn';
         }
+    }
+    prepareCheckinPage(req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>) {
+        // TODO - load the checked out boats from the database
+        const boats = [
+            { id: 1, name: 'Blue Rib' },
+            { id: 2, name: 'Tornado II' }
+        ];
+        res.locals.boats = boats;
     }
 
     public processIncommingForm(req: Request, res: Response, currentPage: string): void {

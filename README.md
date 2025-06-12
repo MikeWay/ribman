@@ -52,3 +52,6 @@ Once the server is running, you can access the following routes:
 ## Contributing
 
 Feel free to submit issues or pull requests for any improvements or features you would like to see in this project.
+
+## Run on server
+use forever bin/server.js from the app root dir
