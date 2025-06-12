@@ -12,7 +12,16 @@
     <%- include(pageBody) %>
     <form action="/navigate" method="POST" class="d-flex justify-content-center gap-2 mt-4">
         <button type="submit" name="action" value="previous" class="btn btn-primary">Previous</button>
-        <button type="submit" name="action" value="next" class="btn btn-success" onclick="addFormData(event)">Next</button>
+        <button type="submit" name="action" value="next" class="btn btn-success" onclick="addFormData(event)" id="nextButton" disabled>Next</button>
+        <script>
+            document.addEventListener('input', () => {
+            const nextButton = document.getElementById('nextButton');
+            if (nextButton) {
+                nextButton.disabled = !isValid();
+            }
+            });
+
+        </script>
         <button type="button" class="btn btn-secondary" onclick="window.location.href='/'">Home</button>
         <script>
             function addFormData(event) {

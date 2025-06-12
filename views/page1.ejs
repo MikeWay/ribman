@@ -9,4 +9,10 @@
         </div>
     </div>
 </form>
-
+<script>
+    function isValid() {
+        const checkOut = document.getElementById('check_out').checked;
+        const checkIn = document.getElementById('check_in').checked;
+        return checkOut || checkIn;
+    }
+</script>
