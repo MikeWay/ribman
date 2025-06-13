@@ -1,6 +1,7 @@
 import express from 'express';
 import { setRoutes } from './routes/index';
 import session from 'express-session';
+import { DataAccessObject } from './model/dao';
 
 const app = express();
 const PORT = process.env.PORT || 3000;

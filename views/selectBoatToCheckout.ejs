@@ -1,0 +1,20 @@
+<form id="theForm">
+    <div class="container">
+        <div class="row">
+            <% locals.boats.forEach(function(boat, index) { %>
+                <div class="col-md-3" style="padding: 10px;">
+                    <input type="radio" id="<%= boat.id %>" name="boat" value="<%= boat.id %>" class="btn-check" />
+                    <label class="btn btn-outline-primary w-100" for="<%= boat.id %>"><%= boat.name %></label>
+                </div>
+                <% if ((index + 1) % 4 === 0) { %>
+                    </div><div class="row">
+                <% } %>
+            <% }); %>
+        </div>
+    </div>
+</form>
+<script>
+    function isValid() {
+        return true
+    }
+</script>

@@ -67,9 +67,9 @@
                 inputs.forEach(input => {
                 if (input.type === 'radio') {
                     if (input.checked) {
-                    formData[input.id] = input.value;
+                    formData[input.name] = input.value;
                     }
-                } else if (input.name) {
+                } else if (input.id) {
                     formData[input.name] = input.value;
                 }
                 });

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
 import session from 'express-session';
 import { ParsedQs } from 'qs';
+import { dao } from '../model/dao';
 
 // Extend the SessionData interface to include pageBody
 declare module 'express-session' {
@@ -18,14 +19,14 @@ export class IndexController {
     // The keys are the current page, and the values are the next page
     // This allows for easy navigation between pages        
     private pageTransitionsCheckOut: { [key: string]: string } = {
-        'page1': 'page2',
-        'page2': 'page3',
-        'page3': 'checkedOut' // Loop back to page1
+        'page1': 'selectBoatToCheckout',
+        'selectBoatToCheckout': 'whoAreYou',
+        'whoAreYou': 'checkedOut' // Loop back to page1
     };
 
     private pageTransitionsCheckIn: { [key: string]: string } = {
         'page1': 'startCheckIn',
-        'startCheckIn': 'recordEngineHours',    
+        'startCheckIn': 'recordEngineHours',
         'recordEngineHours': 'checkInComplete', // Record Engine Hours page
         'checkInComplete': 'page1', // Check-In Complete page
     };
@@ -43,7 +44,7 @@ export class IndexController {
 
     public navigate(req: Request, res: Response): void {
         const currentPage = req.session.pageBody || 'page1';
-        
+
         const action = req.method === 'POST' ? req.body.action as string : req.query.action as string || 'next';
         if (action === 'next') {
             this.processIncommingForm(req, res, currentPage);
@@ -51,7 +52,7 @@ export class IndexController {
 
         let targetPage: string;
         const transitions = req.session.checkIn === true ? this.pageTransitionsCheckIn : this.pageTransitionsCheckOut;
-        
+
 
         if (action === 'previous') {
             targetPage = Object.keys(transitions).find(
@@ -74,15 +75,15 @@ export class IndexController {
                 this.processPage1Data(req, res);
                 console.log('Preparing data for page1');
                 break;
-            case 'page2':
+            case 'selectBoatToCheckout':
                 // Process form data for page2 if needed
                 console.log('Preparing data for page2');
-                this.preparePage2(req, res);
+                this.prepareSelectBoatToCheckoutPage(req, res);
                 break;
-            case 'page3':
+            case 'whoAreYou':
                 // Process form data for page3 if needed
                 console.log('Preparing data for page3');
-                this.preparePage3(req, res);
+                this.prepareWhoAreYouPage(req, res);
                 break;
             case 'startCheckIn':
                 // Prepare data for the start of the check-in process
@@ -92,11 +93,8 @@ export class IndexController {
         }
     }
     prepareCheckinPage(req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>) {
-        // TODO - load the checked out boats from the database
-        const boats = [
-            { id: 1, name: 'Blue Rib' },
-            { id: 2, name: 'Tornado II' }
-        ];
+
+        const boats = dao.boatManager.getCheckedOutBoats();
         res.locals.boats = boats;
     }
 
@@ -108,9 +106,10 @@ export class IndexController {
                 this.processPage1Data(req, res);
                 console.log('Processing form data for page1');
                 break;
-            case 'page2':
+            case 'selectBoatToCheckout':
                 // Process form data for page2 if needed
-                console.log('Processing form data for page2');
+                console.log('Processing form data for selectBoatToCheckout');
+                this.processBoatSelection(req, res);
                 break;
             case 'page3':
                 // Process form data for page3 if needed
@@ -118,35 +117,38 @@ export class IndexController {
                 break;
         }
     }
+    processBoatSelection(req: Request, res: Response) {
+        // get the boat id from the request body
+        const boatId = req.body.boat;
+        if (boatId) {
+            // If a boat is selected, set the session variable boatId
+            dao.boatManager.checkOutBoat(boatId);
+            console.log(`Boat with ID ${boatId} checked out.`);
+        }
+    }
 
     processPage1Data(req: Request, res: Response) {
         // Test if the check_in attribute is present in the request body
-        if (req.body.check_in) {
+        if (req.body.check_in === 'true') {
             // If it is, set the session variable checkIn to true
             req.session.checkIn = true;
             console.log('Check-in mode enabled');
-        }
-        else {
+        } else {
             // If it is not, set the session variable checkIn to false
             req.session.checkIn = false;
             console.log('Check-in mode disabled');
         }
     }
 
-    public preparePage2(req: Request, res: Response) {
+    public prepareSelectBoatToCheckoutPage(req: Request, res: Response) {
         // build a list of boats with name and id and pass it to the view
-        const boats = [
-            { id: 1, name: 'Blue Rib' },
-            { id: 2, name: 'Grey Rib' },
-            { id: 3, name: 'Spare Rib' },
-            { id: 4, name: 'Tornado II' }
-        ];
+        const boats = dao.boatManager.getAvailableBoats();
         res.locals.boats = boats;
         res.locals.pageBody = 'page2';
 
     }
 
-    public preparePage3(req: Request, res: Response): void {
+    public prepareWhoAreYouPage(req: Request, res: Response): void {
         // build a list of people with name and id and pass it to the view
         const people = [
             { id: 1, name: 'John Doe' },
