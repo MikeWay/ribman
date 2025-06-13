@@ -36,12 +36,10 @@ export class BoatManager {
         return false;
     }
 
-    returnBoat(id: string): boolean {
-        const boat = this.boats.find(boat => boat.id === id);
-        if (boat && !boat.isAvailable) {
-            boat.isAvailable = true;
-            return true;
+    getBoatById(id: string): Boat | undefined {
+        if (!id) {
+            return undefined;
         }
-        return false;
+        return this.boats.find(boat => boat.id === id);
     }
 }

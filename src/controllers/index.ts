@@ -3,12 +3,14 @@ import { ParamsDictionary } from 'express-serve-static-core';
 import session from 'express-session';
 import { ParsedQs } from 'qs';
 import { dao } from '../model/dao';
+import { Boat } from '../model/boats';
 
 // Extend the SessionData interface to include pageBody
 declare module 'express-session' {
     interface SessionData {
         pageBody?: string;
         checkIn?: boolean;
+        theBoat?: Boat
     }
 }
 
@@ -27,7 +29,8 @@ export class IndexController {
     private pageTransitionsCheckIn: { [key: string]: string } = {
         'page1': 'startCheckIn',
         'startCheckIn': 'recordEngineHours',
-        'recordEngineHours': 'checkInComplete', // Record Engine Hours page
+        'recordEngineHours': 'areThereDefects',  // Record Engine Hours page
+        'areThereDefects': 'checkInComplete', // Are There Defects page
         'checkInComplete': 'page1', // Check-In Complete page
     };
 
@@ -72,7 +75,7 @@ export class IndexController {
         switch (targetPage) {
             case 'page1':
                 // Process form data for page1 if needed
-                this.processPage1Data(req, res);
+                this.processCheckinOrCheckout(req, res);
                 console.log('Preparing data for page1');
                 break;
             case 'selectBoatToCheckout':
@@ -89,21 +92,37 @@ export class IndexController {
                 // Prepare data for the start of the check-in process
                 console.log('Preparing data for startCheckIn');
                 this.prepareCheckinPage(req, res);
-                res.locals.pageBody = 'startCheckIn';
+                break;
+            case 'checkInComplete':
+                // Prepare data for the check-in complete page
+                console.log('Preparing data for checkInComplete');
+                break;
+            case 'recordEngineHours':
+                // Prepare data for the record engine hours page
+                console.log('Preparing data for recordEngineHours');
+                break;
+            case 'checkedOut':
+                // Prepare data for the checked out page
+                console.log('Preparing data for checkedOut');
+                // You can add any additional data preparation here if needed
+                this.prepareCheckedOutPage(req, res);
+                break;
+            default:
+                // If the target page is not recognized, default to page1
+                console.log(`Unknown page: ${targetPage}, defaulting to page1`);
+                res.locals.pageBody = 'page1';
+                req.session.pageBody = res.locals.pageBody;
+                break;
         }
     }
-    prepareCheckinPage(req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>) {
 
-        const boats = dao.boatManager.getCheckedOutBoats();
-        res.locals.boats = boats;
-    }
 
     public processIncommingForm(req: Request, res: Response, currentPage: string): void {
         // Test the current page and decide which function to call
         switch (currentPage) {
             case 'page1':
                 // Process form data for page1 if needed
-                this.processPage1Data(req, res);
+                this.processCheckinOrCheckout(req, res);
                 console.log('Processing form data for page1');
                 break;
             case 'selectBoatToCheckout':
@@ -123,11 +142,12 @@ export class IndexController {
         if (boatId) {
             // If a boat is selected, set the session variable boatId
             dao.boatManager.checkOutBoat(boatId);
+            req.session.theBoat = dao.boatManager.getBoatById(boatId);
             console.log(`Boat with ID ${boatId} checked out.`);
         }
     }
 
-    processPage1Data(req: Request, res: Response) {
+    processCheckinOrCheckout(req: Request, res: Response) {
         // Test if the check_in attribute is present in the request body
         if (req.body.check_in === 'true') {
             // If it is, set the session variable checkIn to true
@@ -144,21 +164,39 @@ export class IndexController {
         // build a list of boats with name and id and pass it to the view
         const boats = dao.boatManager.getAvailableBoats();
         res.locals.boats = boats;
-        res.locals.pageBody = 'page2';
+        // If there are no boats available, set the pageBody to 'noBoatsAvailable'
+        if (boats.length === 0) {
+            res.locals.message = 'Sorry: all boats are currently checked out!';
+            console.log('No boats available for checkout');
+        }
 
     }
 
     public prepareWhoAreYouPage(req: Request, res: Response): void {
         // build a list of people with name and id and pass it to the view
-        const people = [
-            { id: 1, name: 'John Doe' },
-            { id: 2, name: 'Jane Smith' },
-            { id: 3, name: 'Alice Johnson' },
-            { id: 4, name: 'Bob Brown' }
-        ];
+        const people = dao.personManager.getPersons()
         res.locals.people = people;
-        res.locals.pageBody = 'page3';
     }
+
+    prepareCheckinPage(req: Request, res: Response) {
+
+        const boats = dao.boatManager.getCheckedOutBoats();
+        res.locals.boats = boats;
+    }
+    prepareCheckedOutPage(req: Request, res: Response) {
+        // Get the boat from the session and pass it to the view
+        const boat = req.session.theBoat;
+        if (boat) {
+            res.locals.boatName = boat.name;
+            console.log(`Boat checked out: ${boat.name}`);
+        } else {
+            res.locals.message = 'No boat selected for checkout.';
+            console.log('No boat selected for checkout.');
+        }
+    }
+
+
+
 }
 
 

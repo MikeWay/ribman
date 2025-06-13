@@ -9,6 +9,9 @@
 </head>
 <body class="container mt-5">
     <h1 class="text-center">ESC Boat Checkout</h1>
+    <% if (typeof locals.message !== 'undefined') { %>
+        <h1 class="error"><%= message %></h1>
+    <% } %>
     <%- include(pageBody) %>
     <form action="/navigate" method="POST" class="d-flex justify-content-center gap-2 mt-4">
         <button type="submit" name="action" value="previous" class="btn btn-primary">Previous</button>
