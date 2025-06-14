@@ -30,7 +30,8 @@ export class IndexController {
         'page1': 'startCheckIn',
         'startCheckIn': 'recordEngineHours',
         'recordEngineHours': 'areThereDefects',  // Record Engine Hours page
-        'areThereDefects': 'checkInComplete', // Are There Defects page
+        'areThereDefects': 'reportFault', // Are There Defects page 
+        'reportFault': 'checkInComplete', // Report Fault page
         'checkInComplete': 'page1', // Check-In Complete page
     };
 
@@ -47,29 +48,28 @@ export class IndexController {
 
     public navigate(req: Request, res: Response): void {
         const currentPage = req.session.pageBody || 'page1';
+        const action = req.method === 'POST' ? req.body.action : req.query.action || 'next';
 
-        const action = req.method === 'POST' ? req.body.action as string : req.query.action as string || 'next';
         if (action === 'next') {
             this.processIncommingForm(req, res, currentPage);
         }
 
-        let targetPage: string;
-        const transitions = req.session.checkIn === true ? this.pageTransitionsCheckIn : this.pageTransitionsCheckOut;
-
-
-        if (action === 'previous') {
-            targetPage = Object.keys(transitions).find(
-                key => transitions[key] === currentPage
-            ) || 'page1';
-        } else {
-            targetPage = transitions[currentPage] || 'page1';
-
+        const transitions = req.session.checkIn ? this.pageTransitionsCheckIn : this.pageTransitionsCheckOut;
+        let targetPage = action === 'previous'
+            ? Object.keys(transitions).find(key => transitions[key] === currentPage) || 'page1'
+            : transitions[currentPage] || 'page1';
+//If current page is areThereDefects and there are no defects, go to checkInComplete
+        if (currentPage === 'areThereDefects' && req.body.defects === 'no' && action === 'next') {
+            console.log('No defects reported, moving to checkInComplete');
+            targetPage = 'checkInComplete';
         }
         this.prepNextPage(req, res, currentPage, targetPage);
         req.session.pageBody = res.locals.pageBody = targetPage;
 
         res.render('index', { title: `${action === 'previous' ? 'Previous' : 'Next'} Page: ${targetPage}` });
     }
+
+
     public prepNextPage(req: Request, res: Response, currentPage: string, targetPage: string): void {
         // Test the current page and decide which function to call
         switch (targetPage) {
@@ -107,6 +107,16 @@ export class IndexController {
                 // You can add any additional data preparation here if needed
                 this.prepareCheckedOutPage(req, res);
                 break;
+            case 'areThereDefects':
+                // Prepare data for the are there defects page
+                console.log('Preparing data for areThereDefects');
+                // You can add any additional data preparation here if needed
+                break;
+            case 'reportFault':
+                // Prepare data for the report fault page
+                console.log('Preparing data for reportFault');
+                // You can add any additional data preparation here if needed
+                break;
             default:
                 // If the target page is not recognized, default to page1
                 console.log(`Unknown page: ${targetPage}, defaulting to page1`);
@@ -133,6 +143,11 @@ export class IndexController {
             case 'page3':
                 // Process form data for page3 if needed
                 console.log('Processing form data for page3');
+                break;
+            case 'reportFault':
+                // Process form data for the report fault page
+                console.log('Processing form data for reportFault');
+                // You can add any additional form processing here if needed
                 break;
         }
     }
