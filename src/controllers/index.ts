@@ -3,7 +3,7 @@ import { ParamsDictionary } from 'express-serve-static-core';
 import session from 'express-session';
 import { ParsedQs } from 'qs';
 import { dao } from '../model/dao';
-import { Boat } from '../model/boats';
+import { Boat } from "../model/Boat";
 
 // Extend the SessionData interface to include pageBody
 declare module 'express-session' {
@@ -36,6 +36,10 @@ export class IndexController {
     };
 
     public getHome(req: Request, res: Response): void {
+
+        // test only
+
+
         res.locals.pageBody = 'page1';
         req.session.pageBody = res.locals.pageBody;
         // render the page1 view with the usernames 
@@ -175,9 +179,9 @@ export class IndexController {
         }
     }
 
-    public prepareSelectBoatToCheckoutPage(req: Request, res: Response) {
+    public async prepareSelectBoatToCheckoutPage(req: Request, res: Response) {
         // build a list of boats with name and id and pass it to the view
-        const boats = dao.boatManager.getAvailableBoats();
+        const boats = await dao.boatManager.getAvailableBoats();
         res.locals.boats = boats;
         // If there are no boats available, set the pageBody to 'noBoatsAvailable'
         if (boats.length === 0) {
