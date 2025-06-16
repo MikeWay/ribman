@@ -1,5 +1,6 @@
 import { Boat } from "./Boat";
 import {
+  AttributeValue,
     DynamoDBClient,
     ScanCommand,
 } from '@aws-sdk/client-dynamodb';
@@ -13,11 +14,12 @@ const TABLE_NAME = 'Boats'; // update as needed
 
 export class BoatManager {
     private boats: Boat[] = [
-        new Boat({ id: '1', name: 'Blue Rib', isAvailable: true }),
-        new Boat({ id: '2', name: 'Grey Rib', isAvailable: true }),
-        new Boat({ id: '3', name: 'Spare Rib', isAvailable: true }),
-        new Boat({ id: '4', name: 'Tornado II', isAvailable: true }),
-        new Boat({ id: '5', name: 'Yellow Rib', isAvailable: true })
+        new Boat('1', 'Blue Rib',true ),  // Example boat with id, name, and availability
+        new Boat('2', 'Grey Rib', true),
+        new Boat('3', 'Spare Rib', true),
+        new Boat('4', 'Tornado II', true),
+        new Boat('5', 'Yellow Rib', true),
+        
         // { id: '2', name: 'Grey Rib', isAvailable: true },
         // { id: '3', name: 'Spare Rib', isAvailable: true },
         // { id: '4', name: 'Tornado II', isAvailable: true },
@@ -104,7 +106,19 @@ export class BoatManager {
       
         try {
           const result = await this.ddbDocClient.send(command);
-          return (result.Items || []).map((item) => new Boat(item  as Partial<Boat>));
+          console.log(`✅ Fetched ${result.Count} boats from DynamoDB`);
+          // Map the result to Boat instances
+          if (!result.Items) {
+            console.warn('No boats found in DynamoDB');
+            return [];
+          }
+          // Ensure result.Items is an array before mapping
+          console.log(`Boats fetched: ${JSON.stringify(result.Items)}`);
+          if (!Array.isArray(result.Items)) {
+            console.warn('Result items are not an array:', result.Items);
+            return [];
+          }
+          return (result.Items || []).map((item) => new Boat(item.id?.S, item.name?.S, item.isAvailable?.BOOL ?? true));
         } catch (err) {
           console.error('❌ Error listing boats:', err);
           throw err;
