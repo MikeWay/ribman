@@ -14,7 +14,8 @@ export class PagePreparationController {
                 this.prepareWhoAreYouPage(req, res);
                 break;
             case 'startCheckIn':
-                this.prepareCheckinPage(req, res);
+                await this.prepareCheckinPage(req, res);
+                console.log(`Preparing data for startCheckIn ${res.locals.boats}`);
                 break;
             case 'checkInComplete':
                 console.log('Preparing data for checkInComplete');
@@ -24,7 +25,7 @@ export class PagePreparationController {
                 break;
             case 'checkedOut':
                 console.log('Preparing data for checkedOut');
-                this.prepareCheckedOutPage(req, res);
+                await this.prepareCheckedOutPage(req, res);
         }
     }
 
@@ -48,11 +49,19 @@ export class PagePreparationController {
         res.locals.boats = await dao.boatManager.getCheckedOutBoats();
     }
 
-    prepareCheckedOutPage(req: Request, res: Response) {
+    async prepareCheckedOutPage(req: Request, res: Response): Promise<void> {
         // Get the boat from the session and pass it to the view
-        const boat = req.session.theBoat;
+        const theBoatId = req.session.theBoatId;
+        let boat;
+        if (typeof theBoatId === 'string') {
+            boat = await dao.boatManager.getBoatById(theBoatId);
+        } else {
+            boat = undefined;
+        }
         if (boat) {
             res.locals.boatName = boat.name;
+            boat.isAvailable = false; // Mark the boat as not available
+            await dao.boatManager.saveBoat(boat);
             console.log(`Boat checked out: ${boat.name}`);
         } else {
             res.locals.message = 'No boat selected for checkout.';

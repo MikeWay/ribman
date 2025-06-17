@@ -19,7 +19,7 @@ export class Boat {
         return `Boat ID: ${this.id}, Name: ${this.name}, Available: ${this.isAvailable}`;
     }
 
-    toItem(): Record<string, any> {
+    toItem(): { id: string; name: string; isAvailable: boolean } {
         return {
           id: this.id,
           name: this.name,

@@ -10,7 +10,7 @@ declare module 'express-session' {
     interface SessionData {
         pageBody?: string;
         checkIn?: boolean;
-        theBoat?: Boat
+        theBoatId?: string
     }
 }
 

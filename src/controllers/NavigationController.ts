@@ -46,7 +46,7 @@ export class NavigationController {
         const action = req.method === 'POST' ? req.body.action : req.query.action || 'next';
 
         if (action === 'next') {
-            this.formProcessingController.processIncomingForm(req, res, currentPage);
+            await this.formProcessingController.processIncomingForm(req, res, currentPage);
         }
 
         const transitions = req.session.checkIn ? this.pageTransitionsCheckIn : this.pageTransitionsCheckOut;

@@ -1,4 +1,4 @@
-import { BoatManager } from "./boats";
+import { BoatManager } from "./boatManager";
 import { PersonManager } from "./persons"; // Adjusted the path to the correct location
 
 export class DataAccessObject {

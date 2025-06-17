@@ -42,17 +42,33 @@ export class BoatManager {
     }
     
     async saveBoat(boat: Boat): Promise<void> {
+      if (!boat || typeof boat.toItem !== 'function') {
+      console.error('Invalid boat object provided to saveBoat:', boat);
+      throw new Error('Invalid boat object');
+      }
+
       const command = new PutCommand({
-        TableName: TABLE_NAME,
-        Item: boat.toItem(),
+      TableName: TABLE_NAME,
+      Item: boat.toItem(),
       });
-    
+
       try {
-        await this.ddbDocClient.send(command);
-        console.log(`Boat ${boat.name} saved to DynamoDB`);
-      } catch (err) {
+      await this.ddbDocClient.send(command);
+      console.log(`Boat ${boat.name} saved to DynamoDB`);
+      } catch (err: unknown) {
+      if (typeof err === 'object' && err !== null && 'name' in err) {
+        const errorObj = err as { name?: string; message?: string };
+        if (errorObj.name === 'ResourceNotFoundException') {
+          console.error('DynamoDB table not found:', TABLE_NAME);
+        } else if (errorObj.name === 'ValidationException') {
+          console.error('Validation error saving boat:', errorObj.message);
+        } else {
+          console.error('Error saving boat:', err);
+        }
+      } else {
         console.error('Error saving boat:', err);
-        throw err;
+      }
+      throw err;
       }
     }
     addBoat(boat: Boat): void {
@@ -83,8 +99,8 @@ export class BoatManager {
         return this.boats.filter(boat => !boat.isAvailable);
     }
 
-    checkOutBoat(id: string): boolean {
-        const boat = this.boats.find(boat => boat.id === id);
+    async checkOutBoat(id: string): Promise<boolean> {
+        const boat = await this.getBoatById(id);
         if (boat && boat.isAvailable) {
             boat.isAvailable = false;
             return true;
@@ -92,7 +108,8 @@ export class BoatManager {
         return false;
     }
 
-    getBoatById(id: string): Boat | undefined {
+    async getBoatById(id: string): Promise<Boat | undefined> {
+        await this.ensureBoatsLoaded();
         if (!id) {
             return undefined;
         }

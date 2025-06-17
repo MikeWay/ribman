@@ -1,4 +1,4 @@
-import { BoatManager } from './boats';
+import { BoatManager } from './boatManager';
 import { Boat } from './Boat';
 import {DynamoDBClient} from '@aws-sdk/client-dynamodb';
 import {                
