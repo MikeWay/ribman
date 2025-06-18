@@ -1,15 +1,51 @@
 import { Defect } from "./defect";
 
 export class LogEntry {
-    boatName: string;
-    personName: string;
-    checkOutDateTime: Date;
-    defect: Defect;
+    logKey: string; // Optional, can be used for unique identification
+    boatName?: string;
+    boatId?: string;
+    personName?: string;
+    checkOutDateTime?: Date;
+    checkInDateTime?: Date;
+    checkOutReason?: string;
+    defect?: Defect | null;
 
-    constructor(boatName: string, personName: string, checkOutDateTime: Date, defect: Defect) {
-        this.boatName = boatName;
-        this.personName = personName;
-        this.checkOutDateTime = checkOutDateTime;
-        this.defect= defect;
+    constructor(init: Partial<LogEntry>) {
+        Object.assign(this, init);
+        this.logKey = init.logKey ?? `${init.boatName}-${new Date().toISOString()}`;
     }
+
+    // constructor(boatName: string, checkOutDateTime: Date, defect: Defect | null) {
+    //     // Initialize the properties of the LogEntry
+    //     this.logKey = `${boatName}-${new Date().toISOString()}`;
+    //     this.boatName = boatName;
+    //     this.checkOutDateTime = checkOutDateTime;
+    //     this.defect = defect;
+    // }
+
+    public toItem(): {
+        logKey: string;
+        boatName: string;
+        personName: string;
+        checkOutDateTime?: number;
+        checkInDateTime?: number;
+        checkOutReason?: string;
+        defect: string;
+    } {
+        return {
+            logKey: this.logKey,
+            boatName: this.boatName ?? "",
+            personName: this.personName ?? "",
+            checkOutDateTime: new Date(this.checkOutDateTime).getTime(),
+            checkInDateTime: this.checkInDateTime?.getTime(),
+            checkOutReason: this.checkOutReason?this.checkOutReason : "",
+            defect: ""
+        };
+    }
+    public toString(): string {
+        return `LogEntry: Boat Name: ${this.boatName}, Person Name: ${this.personName}, 
+        Check Out DateTime: ${this.checkOutDateTime}, Check In DateTime: ${this.checkInDateTime}, 
+        Check Out Reason: ${this.checkOutReason}, Defect: ${this.defect? this.defect.description: 'No Defect'}`;
+    }
+
 }

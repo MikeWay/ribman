@@ -11,9 +11,9 @@
     "lint": "eslint 'src/**/*.{ts,js}'"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.828.0",
+    "@aws-sdk/client-dynamodb": "^3.830.0",
     "@aws-sdk/client-rds-data": "^3.828.0",
-    "@aws-sdk/lib-dynamodb": "^3.828.0",
+    "@aws-sdk/lib-dynamodb": "^3.830.0",
     "ejs": "^3.1.10",
     "express": "^4.17.1",
     "express-session": "^1.18.1",

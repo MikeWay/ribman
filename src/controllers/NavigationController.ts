@@ -29,7 +29,8 @@ export class NavigationController {
     private pageTransitionsCheckOut: { [key: string]: string } = {
         'page1': 'selectBoatToCheckout',
         'selectBoatToCheckout': 'whoAreYou',
-        'whoAreYou': 'checkedOut'
+        'whoAreYou': 'reasonForCheckout',
+        'reasonForCheckout': 'checkedOut'
     };
 
     private pageTransitionsCheckIn: { [key: string]: string } = {

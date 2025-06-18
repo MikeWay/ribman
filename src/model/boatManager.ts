@@ -1,6 +1,5 @@
 import { Boat } from "./Boat";
 import {
-  AttributeValue,
     DynamoDBClient,
     ScanCommand,
 } from '@aws-sdk/client-dynamodb';
@@ -8,9 +7,11 @@ import {
     DynamoDBDocumentClient,
     PutCommand,
 } from '@aws-sdk/lib-dynamodb';
+import { Config } from "./Config";
 
-const REGION = 'eu-west-1'; // update as needed
+
 const TABLE_NAME = 'Boats'; // update as needed
+const REGION = Config.getInstance().get('region');
 
 export class BoatManager {
     private boats: Boat[] = [

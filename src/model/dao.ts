@@ -1,14 +1,17 @@
 import { BoatManager } from "./boatManager";
+import { LogManager, logManager } from "./LogManager";
 import { PersonManager } from "./persons"; // Adjusted the path to the correct location
 
 export class DataAccessObject {
     public boatManager: BoatManager;
     public personManager: PersonManager;
+    public logManager: LogManager; // Placeholder for LogManager, adjust as needed
 
     constructor() {
         // Initialize the boat manager and person manager
         this.boatManager = new BoatManager();
         this.personManager = new PersonManager();
+        this.logManager = logManager;
         this.initialize();
     }
     public async initialize(): Promise<void> {

@@ -1,0 +1,16 @@
+<form id="theForm">
+    <div class="mb-3">
+        <label for="reasonSelect" class="form-label">Select a reason</label>
+        <select class="form-select" id="reasonSelect" name="reason">
+            <option value=""></option>
+            <% reasons.forEach(function(reason) { %>
+                <option value="<%= reason %>"><%= reason %></option>
+            <% }); %>
+        </select>
+    </div>
+</form>
+<script>
+    function isValid() {
+        return true;
+    }
+</script>

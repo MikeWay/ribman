@@ -1,5 +1,9 @@
 import { Request, Response } from 'express';
 import { dao } from '../model/dao';
+import { ParamsDictionary } from 'express-serve-static-core';
+import { ParsedQs } from 'qs';
+import { LogEntry } from '../model/log';
+import session from 'express-session';
 
 export class FormProcessingController {
     public async processIncomingForm(req: Request, res: Response, currentPage: string): Promise<void> {
@@ -19,36 +23,47 @@ export class FormProcessingController {
             case 'whoAreYou':
                 {
                     console.log('Processing form data for whoAreYou');
-                    const personName = req.body.person;
-                    if (personName) {
-                        const person = dao.personManager.getPersonByName(personName);
-                        if (person) {
-                            req.session.person = person;
-                            console.log(`Person selected: ${person.name}`);
-                        } else {
-                            console.log(`Person not found`);
-                        }
-                    }
+                    this.processWhoAreYou(req, res);
                     break;
                 }
             case 'checkInComplete':
                 {
                     console.log('Processing form data for checkInComplete');
-                    const boatId = req.session.theBoatId;
-                    if (boatId) {
-                        const boat = await dao.boatManager.getBoatById(boatId);
-                        if (boat) {
-                            // Assuming the boat is checked in, save it to the database
-                            boat.isAvailable = true; // Mark the boat as available
-                            dao.boatManager.saveBoat(boat);
-                        }
-                    }
+
                     break;
                 }
             case 'checkedOut':
                 console.log('Processing form data for checkedOut');
+                break
+            case 'reasonForCheckout':
+                console.log('Processing form data for reasonForCheckout');
+                this.processReasonForCheckout(req, res);
+                break;
 
             // Here you might want to finalize the check-in process, e.g., save engine hours or defects
+        }
+    }
+    processReasonForCheckout(req: Request, res: Response) {
+        const reason = req.body.reason;
+        if (reason) {
+            if(req.session.logEntry)
+                req.session.logEntry.checkOutReason = reason;
+            console.log(`Checkout reason set: ${reason}`);
+        }
+    }
+
+    private processWhoAreYou(req: Request, res: Response) {
+        const personId = req.body.person;
+        if (personId) {
+            const person = dao.personManager.getPersonById(personId);
+            if (person) {
+                req.session.person = person;
+                console.log(`Person selected: ${person.name}`);
+                if(req.session.logEntry)
+                    req.session.logEntry.personName = person.name;
+            } else {
+                console.log(`Person not found`);
+            }
         }
     }
 
@@ -65,6 +80,8 @@ export class FormProcessingController {
                 console.error('Invalid boat object provided to saveBoat:', boat);
                 throw new Error('Invalid boat object');
             }
+            // Start building the log entry
+            req.session.logEntry = new LogEntry({boatName: boat.name, checkOutDateTime: new Date()});
         }
     }
 }
