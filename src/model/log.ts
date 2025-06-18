@@ -13,6 +13,13 @@ export class LogEntry {
     constructor(init: Partial<LogEntry>) {
         Object.assign(this, init);
         this.logKey = init.logKey ?? `${init.boatName}-${new Date().toISOString()}`;
+        if(this.checkOutDateTime && typeof this.checkOutDateTime === 'string') {
+            // Convert string to Date if necessary
+            this.checkOutDateTime = new Date(this.checkOutDateTime as unknown as string);
+        }
+        if(init.checkInDateTime && typeof init.checkInDateTime === 'string') {
+            this.checkInDateTime = new Date(init.checkInDateTime as unknown as string);
+        }
     }
 
     // constructor(boatName: string, checkOutDateTime: Date, defect: Defect | null) {
@@ -36,7 +43,7 @@ export class LogEntry {
             logKey: this.logKey,
             boatName: this.boatName ?? "",
             personName: this.personName ?? "",
-            checkOutDateTime: new Date(this.checkOutDateTime).getTime(),
+            checkOutDateTime: this.checkOutDateTime?.getTime(),
             checkInDateTime: this.checkInDateTime?.getTime(),
             checkOutReason: this.checkOutReason?this.checkOutReason : "",
             defect: ""
