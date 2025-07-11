@@ -3,7 +3,7 @@ import { PagePreparationController } from './PagePreparationController';
 import { FormProcessingController } from './FormProcessingController';
 import { SessionData } from 'express-session';
 import { Boat } from '../model/Boat';
-import { Person } from '../model/persons';
+import { Person } from '../model/PersonManager';
 
 declare module 'express-session' {
     export interface SessionData {

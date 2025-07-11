@@ -39,15 +39,33 @@ export class FormProcessingController {
                 console.log('Processing form data for reasonForCheckout');
                 this.processReasonForCheckout(req, res);
                 break;
+            case 'startCheckIn':
+                console.log('Processing form data for startCheckIn');
+                // You might want to add logic here to prepare for the check-in process
+                this.processStartCheckIn(req, res);
+                
+                break;
+            default:
+                console.log(`Unknown page: ${currentPage}, defaulting to page1`);
+                res.locals.pageBody = 'page1';
+                req.session.pageBody = res.locals.pageBody;
+                break;
 
             // Here you might want to finalize the check-in process, e.g., save engine hours or defects
         }
     }
-    processReasonForCheckout(req: Request, res: Response) {
+    processStartCheckIn(req: Request, res: Response) {
+        throw new Error('Method not implemented.');
+    }
+    
+    private async processReasonForCheckout(req: Request, res: Response) {
         const reason = req.body.reason;
         if (reason) {
-            if(req.session.logEntry)
+            if(req.session.logEntry){
                 req.session.logEntry.checkOutReason = reason;
+                await dao.boatManager.checkOutBoat(req.session.theBoatId as string);
+            }
+
             console.log(`Checkout reason set: ${reason}`);
         }
     }
@@ -73,7 +91,6 @@ export class FormProcessingController {
     private async processBoatSelection(req: Request, res: Response): Promise<void> {
         const boatId = req.body.boat;
         if (boatId) {
-            await dao.boatManager.checkOutBoat(boatId);
             req.session.theBoatId = boatId;
             const boat = await dao.boatManager.getBoatById(boatId);
             if (!boat || typeof boat.toItem !== 'function') {
@@ -81,7 +98,7 @@ export class FormProcessingController {
                 throw new Error('Invalid boat object');
             }
             // Start building the log entry
-            req.session.logEntry = new LogEntry({boatName: boat.name, checkOutDateTime: new Date()});
+            req.session.logEntry = new LogEntry({boatName: boat.name, checkOutDateTime: new Date().getTime()});
         }
     }
 }

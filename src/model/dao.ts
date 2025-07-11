@@ -1,6 +1,6 @@
-import { BoatManager } from "./boatManager";
+import { BoatManager } from "./BoatManager";
 import { LogManager, logManager } from "./LogManager";
-import { PersonManager } from "./persons"; // Adjusted the path to the correct location
+import { PersonManager } from "./PersonManager"; // Adjusted the path to the correct location
 
 export class DataAccessObject {
     public boatManager: BoatManager;

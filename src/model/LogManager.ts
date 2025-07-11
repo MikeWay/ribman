@@ -1,7 +1,8 @@
-import { LogEntry } from "./log";
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { LogEntry, LogEntryItem } from "./log";
+import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { Config } from '../model/Config';
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 const LOG_TABLE_NAME = Config.getInstance().get('LOG_TABLE_NAME');
 const REGION = Config.getInstance().get('region');
@@ -26,6 +27,16 @@ export class LogManager {
             console.error('Error saving log entry:', error);
             throw new Error('Failed to save log entry');
         }
+    }
+
+    public async listLogEntries(): Promise<LogEntry[]> {
+        const command = new ScanCommand({
+            TableName: LOG_TABLE_NAME,
+        });
+        const result = await docClient.send(command);
+        //const items =  as LogEntryItem[];
+
+        return (result.Items ?? []).map((item) => new LogEntry(unmarshall(item)));
     }
 }
 
