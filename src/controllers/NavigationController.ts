@@ -3,7 +3,7 @@ import { PagePreparationController } from './PagePreparationController';
 import { FormProcessingController } from './FormProcessingController';
 import { SessionData } from 'express-session';
 import { Boat } from '../model/Boat';
-import { Person } from '../model/PersonManager';
+import { Person } from '../model/Person';
 
 declare module 'express-session' {
     export interface SessionData {
@@ -43,20 +43,24 @@ export class NavigationController {
     };
 
     public async navigate(req: Request, res: Response): Promise<void> {
+        let result = true;
+        let targetPage = req.session.pageBody as string || 'page1';
         const currentPage = req.session.pageBody || 'page1';
         const action = req.method === 'POST' ? req.body.action : req.query.action || 'next';
 
         if (action === 'next') {
-            await this.formProcessingController.processIncomingForm(req, res, currentPage);
+            result = await this.formProcessingController.processIncomingForm(req, res, currentPage);
         }
 
+        if(result){
         const transitions = req.session.checkIn ? this.pageTransitionsCheckIn : this.pageTransitionsCheckOut;
-        let targetPage = action === 'previous'
+          targetPage = action === 'previous'
             ? Object.keys(transitions).find(key => transitions[key] === currentPage) || 'page1'
             : transitions[currentPage] || 'page1';
 
         if (currentPage === 'areThereDefects' && req.body.defects === 'no' && action === 'next') {
             targetPage = 'checkInComplete';
+        }
         }
 
         await this.pagePreparationController.prepareNextPage(req, res, currentPage, targetPage);

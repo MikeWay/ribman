@@ -90,7 +90,7 @@ export class PagePreparationController {
     }
 
     private prepareWhoAreYouPage(req: Request, res: Response): void {
-        res.locals.people = dao.personManager.getPersons();
+        //res.locals.people = dao.personManager.getPersons();
     }
 
     private async prepareCheckinPage(req: Request, res: Response): Promise<void> {

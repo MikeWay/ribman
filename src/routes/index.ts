@@ -2,6 +2,10 @@ import { Router } from 'express';
 import { IndexController } from '../controllers';
 import { NavigationController } from '../controllers/NavigationController';
 import { adminController } from '../controllers/AdminController';
+import multer from 'multer';
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const router = Router();
 const indexController = new IndexController();
@@ -14,4 +18,6 @@ export function setRoutes(app: any) {
     router.get('/report', adminController.genLogReports.bind(adminController));
     router.get('/admin', adminController.getHome.bind(adminController));
     router.post('/checkInAll', adminController.checkInAllBoats.bind(adminController));
+    router.get('/admin/loadUsers', adminController.loadUsers.bind(adminController));
+    router.post('/admin/upload-users', upload.single('csvFile'), adminController.uploadUsers.bind(adminController));
 }

@@ -45,6 +45,14 @@
 </form>
 <script>
     function isValid() {
-        return true
+        const familyInitial = document.getElementById('familyInitial');
+        const monthSelect = document.getElementById('monthSelect');
+        const daySelect = document.getElementById('daySelect');
+
+        const familyInitialValid = /^[A-Za-z]$/.test(familyInitial.value);
+        const monthValid = monthSelect.value !== "";
+        const dayValid = daySelect.value !== "";
+
+        return familyInitialValid && monthValid && dayValid;
     }
 </script>

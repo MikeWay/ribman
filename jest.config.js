@@ -8,4 +8,7 @@ module.exports = {
   transform: {
     ...tsJestTransformCfg,
   },
+  roots: [
+    "./tests-jest/"
+  ],
 };

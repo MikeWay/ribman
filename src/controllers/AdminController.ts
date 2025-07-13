@@ -1,8 +1,17 @@
 import { dao } from "../model/dao";
 import { logManager } from "../model/LogManager";
 import { Request, Response } from 'express';
+import multer from 'multer';
+import { Person } from "../model/Person";
+
+// Extend Express Request type to include file property
+interface MulterRequest extends Request {
+    file?: Express.Multer.File;
+}
+
 
 export class AdminController {
+    
     constructor() {
         // Initialization code if needed
     }
@@ -36,6 +45,51 @@ export class AdminController {
         // render the page1 view with the usernames 
         res.render('index', { title: 'Admin' });
     }
+
+    public loadUsers(req: Request, res: Response): void {
+        res.locals.pageBody = 'adminLoadUsers';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminLoadUsers view
+        res.render('index', { title: 'Load Users' });
+    }
+    
+    // Method to handle file upload and process CSV data
+    // Expect the CSV to have columns: id, firstName, lastName, dob
+    
+    public async uploadUsers(req: MulterRequest, res: Response): Promise<void> {
+        try {
+            // handle file upload 
+            if (!req.file) {
+                res.locals.pageBody = 'error';
+                res.render('index', { title: 'Error', message: 'No file uploaded' });
+                return;
+            }
+            const csvData = req.file.buffer.toString('utf-8'); 
+            // Process the CSV file from the buffer line by line
+            const lines = csvData.split('\n').filter(line => line.trim() !== '');
+            // Assuming the first line is the header
+            const header = lines[0].split(',').map(h => h.trim());
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                if (values.length !== header.length) continue; // skip malformed lines
+                // split values[4] (e.g., "1990-01-01") into day, month, year
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const [day, month, year] = values[3].split('-').map(v => parseInt(v, 10));
+                // Create a new Person object
+                const person = new Person(values[0], values[1], values[2], day, month);
+
+                await dao.personManager.savePerson(person);
+            }
+
+            res.status(200).json({ message: 'Users uploaded successfully' });
+
+        }   catch (error) {
+            console.error('Error uploading users:', error);
+            res.status(500).json({ error: 'Failed to upload users' });
+        }
+    }
+    
 }
 
 export const adminController = new AdminController();
