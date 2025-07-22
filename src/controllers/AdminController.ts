@@ -86,9 +86,9 @@ export class AdminController {
                 if (values.length !== header.length) continue; // skip malformed lines
                 // split values[4] (e.g., "1990-01-01") into day, month, year
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const [day, month, year] = values[3].split('-').map(v => parseInt(v, 10));
+                const [year, month, day] = values[3].split('-').map(v => parseInt(v, 10));
                 // Create a new Person object
-                const person = new Person(values[0], values[1], values[2], day, month);
+                const person = new Person(values[0], values[1], values[2], day, month,year);
 
                 await dao.personManager.savePerson(person);
             }

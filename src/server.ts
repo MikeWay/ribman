@@ -15,7 +15,7 @@ app.use(express.static('public')); // Serve static files from the public directo
 app.use('/public', express.static('public'));   
 
 // Middleware
-app.use(audit());
+// app.use(audit()); enable request logging
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Set up session management
