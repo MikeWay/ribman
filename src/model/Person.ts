@@ -5,6 +5,7 @@ export class Person {
     lastName: string; //  last name of the person
     birthMonth: number; // Birth month of the person (1-12)
     birthDay: number; // Birth day of the person
+    birthYear?: number; // Optional birth year of the person
     searchKey?: string; // Optional search key for quick lookups
 
     constructor(
@@ -12,13 +13,15 @@ export class Person {
         firstName: string,
         lastName: string,
         birthMonth: number,
-        birthDay: number
+        birthDay: number,
+        birthYear?: number  
     ) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthMonth = birthMonth;
         this.birthDay = birthDay;
+        this.birthYear = birthYear;
         this.searchKey = `${lastName.toLowerCase().charAt(0)}-${birthDay}-${birthMonth}`;
     }
 
@@ -29,6 +32,7 @@ export class Person {
         lastName: string,
         birthMonth: number,
         birthDay: number,
+        birthYear?: number,
         search_key?: string
     } {
         return {
@@ -37,6 +41,7 @@ export class Person {
             lastName: this.lastName,
             birthMonth: this.birthMonth,
             birthDay: this.birthDay,
+            birthYear: this.birthYear,
             search_key: this.searchKey
         };
     }
@@ -47,14 +52,16 @@ export class Person {
         firstName: string,
         lastName: string,
         birthMonth: number,
-        birthDay: number
+        birthDay: number,
+        birthYear?: number
     }): Person {
         return new Person(
             item.id,
             item.firstName,
             item.lastName,
             item.birthMonth,
-            item.birthDay
+            item.birthDay,
+            item.birthYear
         );
     }       
 }

@@ -40,7 +40,7 @@ test.describe('Check Out Page', () => {
     await page.getByRole('button', { name: 'Next' }).click();
     await page.getByText('Grey Rib').click();
     await page.getByRole('button', { name: 'Next' }).click();
-    await expect(page.getByText('Select a person:')).toBeVisible();
+    await expect(page.getByText('Please complete the details below to identify yourself')).toBeVisible();
 
   });  
 

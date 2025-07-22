@@ -1,7 +1,8 @@
 import express from 'express';
 import { setRoutes } from './routes/index';
 import session from 'express-session';
-import { DataAccessObject } from './model/dao';
+import cors from 'cors';
+import audit from 'express-requests-logger'
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,6 +15,7 @@ app.use(express.static('public')); // Serve static files from the public directo
 app.use('/public', express.static('public'));   
 
 // Middleware
+app.use(audit());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Set up session management
@@ -25,11 +27,20 @@ app.use(session({
     }));
 // Set up body parser for form submissions
 app.use(express.urlencoded({ extended: true }));         
+const corsOptions = {
+  origin: '*',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
 
+app.use(cors(corsOptions));
 // Set up routes
 setRoutes(app);
 
 // Start the server
+//app.use(cors(corsOptions));
+// app.options('*', cors(corsOptions))
+// app.post('*', cors(corsOptions))
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

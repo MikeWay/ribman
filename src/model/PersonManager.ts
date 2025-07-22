@@ -3,8 +3,8 @@
 // class PersonManager {
 
 import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
-import { NumberValue, unmarshall } from '@aws-sdk/util-dynamodb';
+import { DeleteCommand, DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+import {  unmarshall } from '@aws-sdk/util-dynamodb';
 import { Person } from './Person';
 import { Config } from './Config';
 
@@ -19,12 +19,12 @@ export class PersonManager {
         this.client = client;
         this.ddbDocClient = DynamoDBDocumentClient.from(this.client);
     }
-      
-      private ddbDocClient = DynamoDBDocumentClient.from(this.client);
+
+    private ddbDocClient = DynamoDBDocumentClient.from(this.client);
 
 
     // method to save a person to the database
-    async savePerson(person: Person): Promise<void> {   
+    async savePerson(person: Person): Promise<void> {
         if (!person || typeof person.toItem !== 'function') {
             console.error('Invalid person object provided to savePerson:', person);
             throw new Error('Invalid person object');
@@ -42,7 +42,7 @@ export class PersonManager {
             console.error(`Error saving person with ID ${person.id}:`, err);
             throw err;
         }
-    }   
+    }
 
     // method to load all persons from the database
     async loadAllPersons(): Promise<Person[]> {
@@ -63,22 +63,58 @@ export class PersonManager {
         }
     }
 
+    async deleteAllPersons(): Promise<void> {
+        const command = new ScanCommand({
+            TableName: TABLE_NAME,
+        }); 
+        try {
+            const response = await this.ddbDocClient.send(command);
+            if (response.Items && response.Items.length > 0) {
+                for (const item of response.Items) {
+                    const person = Person.fromItem(unmarshall(item) as Person);
+                    if(person && person.id && person.searchKey) {
+                        console.log(`Deleting person with ID ${person.id} and searchKey ${person.searchKey}`);
+                        await this.deletePerson(person.id, person.searchKey);
+                    }
+                }
+            }
+        } catch (err: unknown) {
+            console.error('Error deleting persons from DynamoDB:', err);
+            throw err;
+        }
+    }
+    // method to delete a person by id
+    async deletePerson(id: string, search_key: string): Promise<void> {
+        const command = new DeleteCommand({
+            TableName: TABLE_NAME,      
+            Key: {id: id, search_key: search_key            },
+        });     
+        try {
+            await this.ddbDocClient.send(command);
+            console.log(`Person with ID ${id} deleted from DynamoDB`);
+        } catch (err: unknown) {
+            console.error(`Error deleting person with ID ${id}:`, err);
+            throw err;
+        }
+    }
+
     // method to get a person by first letter of their last name , there day of birth and month of birth
     async getPersonByLastNameAndBirthDate(
         firstLetter: string,
         birthDay: number,
         birthMonth: number
-    ): Promise<Person | null> {
+    ): Promise<Person[] | null> {
         firstLetter = firstLetter.toLowerCase();
 
         const searchPerson = new Person('0', '', firstLetter, birthDay, birthMonth); // Create a dummy person to use the toItem method
+        const peopleFound: Person[] = [];
 
         // construct a Person search key
         if (!firstLetter || !birthDay || !birthMonth) {
             console.error('Invalid parameters for getPersonByLastNameAndBirthDate:', { firstLetter, birthDay, birthMonth });
             throw new Error('Invalid parameters');
 
-        }  
+        }
 
         const command = new ScanCommand({
             TableName: TABLE_NAME,
@@ -91,14 +127,20 @@ export class PersonManager {
         try {
             const response = await this.ddbDocClient.send(command);
             if (response.Items && response.Items.length > 0) {
-                return Person.fromItem(unmarshall(response.Items[0]) as Person);
+                for (const item of response.Items) {
+                    const person = Person.fromItem(unmarshall(item) as Person);
+                    if (person.lastName.startsWith(firstLetter) && person.birthDay === birthDay && person.birthMonth === birthMonth) {
+                        peopleFound.push(person);
+                    }
+                }
+
             }
-            return null;
+            return peopleFound;
         } catch (err: unknown) {
             console.error('Error getting person by last name and birth date:', err);
             throw err;
         }
-    }   
+    }
 }
 export const personManager = new PersonManager();
 

@@ -101,16 +101,16 @@ describe('PersonManager', () => {
 
     const firstLetter = 'S';
     const birthDay = 15;
-    const birthMonth = 'June';
+    const birthMonth = 6;
 
     it('should return a Person when a matching item is found', async () => {
         const mockItem = {
             id: { S: '3' },
             firstName: { S: 'Sally' },
             lastName: { S: 'Smith' },
-            email: { S: 'sally@example.com' },
             birthDay: { N: '15' },
-            birthMonth: { S: 'June' }
+            birthMonth: { N: 6 },
+            searchKey: {S: "s-15-6"}
         };
         mockSend.mockResolvedValueOnce({ Items: [mockItem] });
 
@@ -119,7 +119,8 @@ describe('PersonManager', () => {
             firstName: 'Sally',
             lastName: 'Smith',
             birthDay: 15,
-            birthMonth: 'June'
+            birthMonth: 6,
+            searchKey: "s-15-6"
          }) as Person);
 
         const result = await personManager.getPersonByLastNameAndBirthDate(firstLetter, birthDay, birthMonth);
@@ -129,11 +130,11 @@ describe('PersonManager', () => {
             id: '3',
             firstName: 'Sally',
             lastName: 'Smith',
-            email: 'sally@example.com',
             birthDay: 15,
-            birthMonth: 'June'
+            birthMonth: 6,
+            searchKey: "s-15-6"
         }));
-        expect(result).toEqual(new Person('3','Sally','Smith','June',15))
+        expect(result).toEqual(new Person('3','Sally','Smith', 6, 15))
 
         fromItemSpy.mockRestore();
     });
@@ -153,5 +154,69 @@ describe('PersonManager', () => {
         await expect(
             personManager.getPersonByLastNameAndBirthDate(firstLetter, birthDay, birthMonth)
         ).rejects.toThrow('DynamoDB error');
+    });
+});
+describe('PersonManager.deleteAllPersons', () => {
+    let personManager: PersonManager;
+    let mockSend: jest.Mock;
+
+    beforeEach(() => {
+        personManager = new PersonManager();
+        // @ts-ignore
+        mockSend = personManager['ddbDocClient'].send as jest.Mock;
+        mockSend.mockClear();
+    });
+
+    it('should delete all persons from the database', async () => {
+        const mockItems = [
+            { id: { S: '1' }, firstName: { S: 'Alice' }, lastName: { S: 'Smith' } },
+            { id: { S: '2' }, firstName: { S: 'Bob' }, lastName: { S: 'Jones' } },
+        ];
+        mockSend.mockResolvedValueOnce({ Items: mockItems });
+
+        await personManager.deleteAllPersons();
+
+        expect(mockSend).toHaveBeenCalledTimes(3); // ScanCommand and a DeleteCommand for each item
+    });
+
+    it('should do nothing if no items are returned from DynamoDB', async () => {
+        mockSend.mockResolvedValueOnce({ Items: [] });
+
+        await expect(personManager.deleteAllPersons()).resolves.not.toThrow();
+        expect(mockSend).toHaveBeenCalledTimes(1); // Only ScanCommand
+    });
+
+    it('should throw an error if ScanCommand fails', async () => {
+        mockSend.mockRejectedValueOnce(new Error('DynamoDB error'));
+
+        await expect(personManager.deleteAllPersons()).rejects.toThrow('DynamoDB error');
+        expect(mockSend).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error if PutCommand fails', async () => {
+        const mockItems = [
+            { id: { S: '1' }, firstName: { S: 'Alice' }, lastName: { S: 'Smith' }, email: { S: 'alice@example.com' } },
+        ];
+        mockSend
+            .mockResolvedValueOnce({ Items: mockItems }) // ScanCommand
+            .mockRejectedValueOnce(new Error('Put error')); // PutCommand
+
+        const fromItemSpy = jest.spyOn(Person, 'fromItem').mockImplementation((item: any) => ({
+            id: item.id.S,
+            firstName: item.firstName.S,
+            lastName: item.lastName.S,
+            email: item.email.S,
+            toItem: jest.fn().mockReturnValue({
+                id: item.id.S,
+                firstName: item.firstName.S,
+                lastName: item.lastName.S,
+                email: item.email.S,
+            }),
+        }) as unknown as Person);
+
+        await expect(personManager.deleteAllPersons()).rejects.toThrow('Put error');
+        expect(mockSend).toHaveBeenCalledTimes(2);
+
+        fromItemSpy.mockRestore();
     });
 });

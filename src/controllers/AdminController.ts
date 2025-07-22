@@ -52,6 +52,17 @@ export class AdminController {
         // render the adminLoadUsers view
         res.render('index', { title: 'Load Users' });
     }
+
+    deleteAllUsers(req: Request, res: Response): void {
+        dao.personManager.deleteAllPersons()
+            .then(() => {
+                res.status(200).json({ message: 'All users deleted successfully.' });
+            })
+            .catch((error) => {
+                console.error('Error deleting all users:', error);
+                res.status(500).json({ error: 'Failed to delete all users' });
+            });
+    }
     
     // Method to handle file upload and process CSV data
     // Expect the CSV to have columns: id, firstName, lastName, dob

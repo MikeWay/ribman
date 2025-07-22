@@ -73,26 +73,27 @@ export class FormProcessingController {
     }
 
     private async processWhoAreYou(req: Request, res: Response): Promise<boolean> {
-        const day = req.body.day;
-        const month: number = req.body.month;
-        const familyInitial = req.body.familyInitial;
-        let result = true;
+        return false;
+        // const day = req.body.day;
+        // const month: number = req.body.month;
+        // const familyInitial = req.body.familyInitial;
+        // let result = true;
 
-        // convert month string to number
+        // // convert month string to number
 
 
-        const person = await dao.personManager.getPersonByLastNameAndBirthDate(familyInitial, day, month);
-        if (person) {
-            req.session.person = person;
-            console.log(`Person selected: ${person.firstName} ${person.lastName}`);
-            if (req.session.logEntry)
-                req.session.logEntry.personName = person.firstName + ' ' + person.lastName;
-        } else {
-            console.log(`Person not found`);
-            result = false;
-            // TODO: Handle the case where the person is not found -- need to redirect to a the previous page       
-        }
-        return result;
+        // const person = await dao.personManager.getPersonByLastNameAndBirthDate(familyInitial, day, month);
+        // if (person) {
+        //     req.session.person = person;
+        //     console.log(`Person selected: ${person.firstName} ${person.lastName}`);
+        //     if (req.session.logEntry)
+        //         req.session.logEntry.personName = person.firstName + ' ' + person.lastName;
+        // } else {
+        //     console.log(`Person not found`);
+        //     result = false;
+        //     // TODO: Handle the case where the person is not found -- need to redirect to a the previous page       
+        // }
+        // return result;
     }
 
     private processCheckinOrCheckout(req: Request, res: Response): void {

@@ -1,0 +1,55 @@
+{
+    "name": "ExpressLogger",
+    "hostname": "mjrw-Intel-Z690",
+    "pid": 4168281,
+    "level": 50,
+    "response": {
+        "status_code": 500,
+        "timestamp": "2025-07-20T08:20:49.552Z",
+        "timestamp_ms": 1752999649552,
+        "elapsed": 3,
+        "headers": {
+            "x-powered-by": "Express",
+            "access-control-allow-origin": "*",
+            "content-type": "application/json; charset=utf-8",
+            "content-length": "33",
+            "etag": "W/\"21-u8tno/8IdqEY6PFcopkQe0syfE4\""
+        },
+        "body": "{\"error\":\"Internal server error\"}"
+    },
+    "request": {
+        "method": "POST",
+        "url_params": {},
+        "url": "/api/check-person",
+        "url_route": "/api/check-person",
+        "query": {},
+        "headers": {
+            "host": "localhost:4200",
+            "connection": "close",
+            "content-length": "41",
+            "sec-ch-ua-platform": "\"Linux\"",
+            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+            "accept": "application/json, text/plain, */*",
+            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+            "content-type": "application/json",
+            "sec-ch-ua-mobile": "?0",
+            "origin": "http://localhost:4200",
+            "sec-fetch-site": "same-origin",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-dest": "empty",
+            "referer": "http://localhost:4200/who-are-you",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "en-US,en;q=0.9,en-GB;q=0.8",
+            "cookie": "connect.sid=s%3ADgu-EBsVfWZtKbtMJLKG-Kkg46TU_CEO.B6BC%2Fx209DksBJ0i29kb1vmdGw95q1dZ2BhUaRD7pfE"
+        },
+        "timestamp": "2025-07-20T08:20:49.549Z",
+        "timestamp_ms": 1752999649549,
+        "body": "{\"familyInitial\":\"a\",\"month\":\"5\",\"day\":2}"
+    },
+    "millis-timestamp": 1752999649552,
+    "utc-timestamp": "2025-07-20T08:20:49.552Z",
+    "stage": "end",
+    "msg": "Inbound Transaction",
+    "time": "2025-07-20T08:20:49.552Z",
+    "v": 0
+}

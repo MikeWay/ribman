@@ -52,6 +52,7 @@ export class NavigationController {
             result = await this.formProcessingController.processIncomingForm(req, res, currentPage);
         }
 
+
         if(result){
         const transitions = req.session.checkIn ? this.pageTransitionsCheckIn : this.pageTransitionsCheckOut;
           targetPage = action === 'previous'
