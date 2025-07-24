@@ -20,17 +20,19 @@ class ApiServer {
     const month = req.body.month || new Date().getMonth() + 1;
     // get day from the request
     const day = req.body.day || new Date().getDate();
+    const year = req.body.year || 0;
     // get familyInitial from the request
     const familyInitial = req.body.familyInitial || '';
 
     
     try {
-      const person = await dao.personManager.getPersonByLastNameAndBirthDate(
+      const peopleFound = await dao.personManager.getPersonByLastNameAndBirthDate(
         familyInitial.toString(),
         Number(day),
-        Number(month)
+        Number(month),
+        Number(year)
       );
-      return res.json(person);
+      return res.json(peopleFound);
     } catch (error) {
       console.error("Error in checkPerson:", error);
       return res.status(500).json({ error: "Internal server error" });

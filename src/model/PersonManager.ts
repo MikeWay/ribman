@@ -100,18 +100,19 @@ export class PersonManager {
 
     // method to get a person by first letter of their last name , there day of birth and month of birth
     async getPersonByLastNameAndBirthDate(
-        firstLetter: string,
+        firstLetterLC: string,
         birthDay: number,
-        birthMonth: number
+        birthMonth: number,
+        birthYear: number
     ): Promise<Person[] | null> {
-        firstLetter = firstLetter.toLowerCase();
+        firstLetterLC = firstLetterLC.toLowerCase();
 
-        const searchPerson = new Person('0', '', firstLetter, birthDay, birthMonth); // Create a dummy person to use the toItem method
+        const searchPerson = new Person('0', '', firstLetterLC, birthMonth, birthDay, birthYear); // Create a dummy person to use the toItem method
         const peopleFound: Person[] = [];
 
         // construct a Person search key
-        if (!firstLetter || !birthDay || !birthMonth) {
-            console.error('Invalid parameters for getPersonByLastNameAndBirthDate:', { firstLetter, birthDay, birthMonth });
+        if (!firstLetterLC || !birthDay || !birthMonth) {
+            console.error('Invalid parameters for getPersonByLastNameAndBirthDate:', { firstLetter: firstLetterLC, birthDay, birthMonth });
             throw new Error('Invalid parameters');
 
         }
@@ -129,7 +130,12 @@ export class PersonManager {
             if (response.Items && response.Items.length > 0) {
                 for (const item of response.Items) {
                     const person = Person.fromItem(unmarshall(item) as Person);
-                    if (person.lastName.startsWith(firstLetter) && person.birthDay === birthDay && person.birthMonth === birthMonth) {
+                    if (
+                        person.lastName.toLowerCase().startsWith(firstLetterLC) &&
+                        person.birthDay === birthDay &&
+                        person.birthMonth === birthMonth &&
+                        (birthYear === 0 || person.birthYear === birthYear)
+                    ) {
                         peopleFound.push(person);
                     }
                 }

@@ -88,7 +88,7 @@ export class AdminController {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const [year, month, day] = values[3].split('-').map(v => parseInt(v, 10));
                 // Create a new Person object
-                const person = new Person(values[0], values[1], values[2], day, month,year);
+                const person = new Person(values[0], values[1], values[2], month, day, year);
 
                 await dao.personManager.savePerson(person);
             }
