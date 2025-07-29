@@ -12,6 +12,7 @@ import { Config } from './Config';
 const TABLE_NAME = 'Boat_Users'; // update as needed
 const REGION = Config.getInstance().get('region');
 
+
 export class PersonManager {
     private client = new DynamoDBClient({ region: REGION });
 
@@ -104,7 +105,7 @@ export class PersonManager {
         birthDay: number,
         birthMonth: number,
         birthYear: number
-    ): Promise<Person[] | null> {
+    ): Promise<Person[]> {
         firstLetterLC = firstLetterLC.toLowerCase();
 
         const searchPerson = new Person('0', '', firstLetterLC, birthMonth, birthDay, birthYear); // Create a dummy person to use the toItem method

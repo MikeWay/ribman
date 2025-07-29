@@ -61,15 +61,15 @@ export class FormProcessingController {
     }
 
     private async processReasonForCheckout(req: Request, res: Response) {
-        const reason = req.body.reason;
-        if (reason) {
-            if (req.session.logEntry) {
-                req.session.logEntry.checkOutReason = reason;
-                await dao.boatManager.checkOutBoat(req.session.theBoatId as string);
-            }
+        // const reason = req.body.reason;
+        // if (reason) {
+        //     if (req.session.logEntry) {
+        //         req.session.logEntry.checkOutReason = reason;
+        //         await dao.boatManager.checkOutBoat(req.session.theBoatId as string);
+        //     }
 
-            console.log(`Checkout reason set: ${reason}`);
-        }
+        //     console.log(`Checkout reason set: ${reason}`);
+        // }
     }
 
     private async processWhoAreYou(req: Request, res: Response): Promise<boolean> {
@@ -100,16 +100,16 @@ export class FormProcessingController {
         req.session.checkIn = req.body.check_in === 'true';
     }
     private async processBoatSelection(req: Request, res: Response): Promise<void> {
-        const boatId = req.body.boat;
-        if (boatId) {
-            req.session.theBoatId = boatId;
-            const boat = await dao.boatManager.getBoatById(boatId);
-            if (!boat || typeof boat.toItem !== 'function') {
-                console.error('Invalid boat object provided to saveBoat:', boat);
-                throw new Error('Invalid boat object');
-            }
-            // Start building the log entry
-            req.session.logEntry = new LogEntry({ boatName: boat.name, checkOutDateTime: new Date().getTime() });
-        }
+        // const boatId = req.body.boat;
+        // if (boatId) {
+        //     req.session.theBoatId = boatId;
+        //     const boat = await dao.boatManager.getBoatById(boatId);
+        //     if (!boat || typeof boat.toItem !== 'function') {
+        //         console.error('Invalid boat object provided to saveBoat:', boat);
+        //         throw new Error('Invalid boat object');
+        //     }
+        //     // Start building the log entry
+        //     req.session.logEntry = new LogEntry({ boatName: boat.name, checkOutDateTime: new Date().getTime() });
+        // }
     }
 }

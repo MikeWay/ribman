@@ -56,7 +56,7 @@
             ]
         },
         {
-            "name": "Jest file",
+   f         "name": "Jest file",
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/jest",

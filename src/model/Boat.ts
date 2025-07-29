@@ -26,4 +26,27 @@ export class Boat {
           isAvailable: this.isAvailable,
         };
       }
+
+    // Static method to create a Boat instance from a DynamoDB item
+    static fromItem(item: {
+        id: string,
+        name: string,
+        isAvailable: boolean,
+        checkedOutTo?: string | null,
+        checkedOutAt?: Date | null,
+        checkedInAt?: Date | null
+
+    }): Boat {
+        const boat = new Boat(
+            item.id,
+            item.name,
+            item.isAvailable
+        );
+        boat.checkedOutTo = item.checkedOutTo ?? null;
+        boat.checkedOutAt = item.checkedOutAt ?? null;
+        boat.checkedInAt = item.checkedInAt ?? null;
+        return boat;
+    }
 }
+
+

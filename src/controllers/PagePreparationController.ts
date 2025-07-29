@@ -48,15 +48,15 @@ export class PagePreparationController {
     }
 
         private async checkBoatIn(req: Request, res: Response) {
-        const boatId = req.session.theBoatId;
-        if (boatId) {
-            const boat = await dao.boatManager.getBoatById(boatId);
-            if (boat) {
-                // Assuming the boat is checked in, save it to the database
-                boat.isAvailable = true; // Mark the boat as available
-                dao.boatManager.saveBoat(boat);
-            }
-        }
+        // const boatId = req.session.theBoatId;
+        // if (boatId) {
+        //     const boat = await dao.boatManager.getBoatById(boatId);
+        //     if (boat) {
+        //         // Assuming the boat is checked in, save it to the database
+        //         boat.isAvailable = true; // Mark the boat as available
+        //         dao.boatManager.saveBoat(boat);
+        //     }
+        // }
     }
 
     saveLogEntry(req: Request) {
@@ -99,21 +99,21 @@ export class PagePreparationController {
 
     async prepareCheckedOutPage(req: Request, res: Response): Promise<void> {
         // Get the boat from the session and pass it to the view
-        const theBoatId = req.session.theBoatId;
-        let boat;
-        if (typeof theBoatId === 'string') {
-            boat = await dao.boatManager.getBoatById(theBoatId);
-        } else {
-            boat = undefined;
-        }
-        if (boat) {
-            res.locals.boatName = boat.name;
-            boat.isAvailable = false; // Mark the boat as not available
-            await dao.boatManager.saveBoat(boat);
-            console.log(`Boat checked out: ${boat.name}`);
-        } else {
-            res.locals.message = 'No boat selected for checkout.';
-            console.log('No boat selected for checkout.');
-        }
+    //     const theBoatId = req.session.theBoatId;
+    //     let boat;
+    //     if (typeof theBoatId === 'string') {
+    //         boat = await dao.boatManager.getBoatById(theBoatId);
+    //     } else {
+    //         boat = undefined;
+    //     }
+    //     if (boat) {
+    //         res.locals.boatName = boat.name;
+    //         boat.isAvailable = false; // Mark the boat as not available
+    //         await dao.boatManager.saveBoat(boat);
+    //         console.log(`Boat checked out: ${boat.name}`);
+    //     } else {
+    //         res.locals.message = 'No boat selected for checkout.';
+    //         console.log('No boat selected for checkout.');
+    //     }
     }
 }

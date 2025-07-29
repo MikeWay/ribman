@@ -12,17 +12,17 @@ export class DataAccessObject {
         this.boatManager = new BoatManager();
         this.personManager = new PersonManager();
         this.logManager = logManager;
-        this.initialize();
+        //this.initialize();
     }
-    public async initialize(): Promise<void> {
-        try {
-            await this.boatManager.initialize();
-            //await this.personManager.initialize();
-            console.log('DAO initialized successfully');
-        } catch (error) {
-            console.error('Error initializing DAO:', error);
-        }
-    }
+    // public async initialize(): Promise<void> {
+    //     try {
+    //         await this.boatManager.initialize();
+    //         //await this.personManager.initialize();
+    //         console.log('DAO initialized successfully');
+    //     } catch (error) {
+    //         console.error('Error initializing DAO:', error);
+    //     }
+    // }
 }
 
 export const dao = new DataAccessObject();

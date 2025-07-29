@@ -5,6 +5,7 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import {
   DynamoDBDocumentClient,
+  GetCommand,
   PutCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { Config } from "./Config";
@@ -15,26 +16,26 @@ const TABLE_NAME = 'Boats'; // update as needed
 const REGION = Config.getInstance().get('region');
 
 export class BoatManager {
-  private boats: Boat[] = [
-    new Boat('1', 'Blue Rib', true),  // Example boat with id, name, and availability
-    new Boat('2', 'Grey Rib', true),
-    new Boat('3', 'Spare Rib', true),
-    new Boat('4', 'Tornado II', true),
-    new Boat('5', 'Yellow Rib', true),
+  // private boats: Boat[] = [
+  //   new Boat('1', 'Blue Rib', true),  // Example boat with id, name, and availability
+  //   new Boat('2', 'Grey Rib', true),
+  //   new Boat('3', 'Spare Rib', true),
+  //   new Boat('4', 'Tornado II', true),
+  //   new Boat('5', 'Yellow Rib', true),
 
-    // { id: '2', name: 'Grey Rib', isAvailable: true },
-    // { id: '3', name: 'Spare Rib', isAvailable: true },
-    // { id: '4', name: 'Tornado II', isAvailable: true },
-    // { id: '5', name: 'Yellow Rib', isAvailable: true },
+  //   // { id: '2', name: 'Grey Rib', isAvailable: true },
+  //   // { id: '3', name: 'Spare Rib', isAvailable: true },
+  //   // { id: '4', name: 'Tornado II', isAvailable: true },
+  //   // { id: '5', name: 'Yellow Rib', isAvailable: true },
 
-  ];
+  // ];
 
 
   private client = new DynamoDBClient({ region: REGION });
   private ddbDocClient = DynamoDBDocumentClient.from(this.client);
 
-  private async saveAllBoats(): Promise<void> {
-    for (const boat of this.boats) {
+  private async saveAllBoats(boats: Boat[]): Promise<void> {
+    for (const boat of boats) {
       try {
         await this.saveBoat(boat);
       } catch (err) {
@@ -73,49 +74,75 @@ export class BoatManager {
       throw err;
     }
   }
-  addBoat(boat: Boat): void {
-    this.boats.push(boat);
-  }
 
-  async ensureBoatsLoaded(): Promise<void> {
-    if (this.boats.length === 0) {
-      console.log('No boats available, fetching from DynamoDB...');
-      try {
-        this.boats = await this.listBoats();
-        console.log(`Loaded ${this.boats.length} boats from DynamoDB`);
-      } catch (err) {
-        console.error('Error fetching boats from DynamoDB:', err);
-      }
-    }
-  }
 
   async getAvailableBoats(): Promise<Boat[]> {
     // Return a list of available boats by calling listBoats
-    await this.ensureBoatsLoaded();
-    return this.boats.filter(boat => boat.isAvailable);
+    const boats = await this.listBoats();
+    return boats.filter(boat => boat.isAvailable === true);
   }
 
   async getCheckedOutBoats(): Promise<Boat[]> {
     // Return a list of checked out boats by calling listBoats
-    await this.ensureBoatsLoaded();
-    return this.boats.filter(boat => !boat.isAvailable);
+    const boats = await this.listBoats();
+    return boats.filter(boat => !boat.isAvailable);
   }
 
-  async checkOutBoat(id: string): Promise<boolean> {
-    const boat = await this.getBoatById(id);
+  async checkOutBoat(theBoat: Boat): Promise<boolean> {
+    // Check if the boat is available and mark it as checked out
+    if (!theBoat || typeof theBoat.id !== 'string') {
+      console.error('Invalid boat provided to checkOutBoat:', theBoat);
+      throw new Error('Invalid boat object');
+    }
+    if (!theBoat || !theBoat.id) {
+      console.error('Invalid boat provided to checkOutBoat:', theBoat);
+      throw new Error('Invalid boat object');
+    }
+    const existingBoat = await this.getBoatByName(theBoat.name);
+    if (!existingBoat) {
+      console.error(`Boat with name ${theBoat.name} not found`);
+      throw new Error(`Boat with name ${theBoat.name} not found`);
+    }
+    if (!existingBoat.isAvailable) {
+      console.warn(`Boat with name ${theBoat.name} is not available for checkout`);
+      return false;
+    }
+    // Mark the boat as checked out
+    existingBoat.isAvailable = false;
+    existingBoat.checkedOutTo = theBoat.checkedOutTo; // Assuming checkedOutTo is set in the Boat object
+    existingBoat.checkedOutAt = new Date(); // Set the current date as checked out time
+    existingBoat.checkedInAt = null; // Reset checked-in time 
+    // Save the updated boat back to DynamoDB
+
+    await this.saveBoat(existingBoat);
+    const boat = await this.getBoatByName(theBoat.name);
     if (boat && boat.isAvailable) {
-      boat.isAvailable = false;
       return true;
     }
     return false;
   }
 
-  async getBoatById(id: string): Promise<Boat | undefined> {
-    await this.ensureBoatsLoaded();
-    if (!id) {
+  async getBoatByName(name: string): Promise<Boat | undefined> {
+    if (!name) {
       return undefined;
     }
-    return this.boats.find(boat => boat.id === id);
+
+    const command = new GetCommand({
+      TableName: TABLE_NAME,
+      Key: { name: name },
+    });
+
+    try {
+      const result = await this.ddbDocClient.send(command);
+      if (!result.Item) {
+        return undefined;
+      }
+      console.log(`Boat with name ${name} fetched from DynamoDB`);
+      return Boat.fromItem(result.Item as Boat);
+    } catch (err) {
+      console.error(`Error fetching boat with name ${name}:`, err);
+      throw err;
+    }
   }
 
   private async listBoats(): Promise<Boat[]> {
@@ -148,24 +175,13 @@ export class BoatManager {
     }
   }
 
-  async initialize(): Promise<void> {
-    try {
-      const boats = await this.listBoats();
-      if (boats.length === 0) {
-        console.log('No boats found in DynamoDB, saving initial boats...');
-        await this.saveAllBoats();
-      } else {
-        this.boats = boats;
-        console.log(`Loaded ${this.boats.length} boats from DynamoDB`);
-      }
-    } catch (err) {
-      console.error('❌ Error initializing BoatManager:', err);
-    }
-  }
+
 
   async checkInAllBoats(): Promise<void> {
     try {
-      for (const boat of await this.boats) {
+      const boats = await this.listBoats()
+
+      for (const boat of await boats) {
         if (!boat.isAvailable) {
           boat.isAvailable = true; // Mark the boat as available
           await this.saveBoat(boat);
@@ -180,36 +196,3 @@ export class BoatManager {
 
 }
 
-
-
-/*
-import {
-  DynamoDBClient,
-} from '@aws-sdk/client-dynamodb';
-import {
-  DynamoDBDocumentClient,
-  PutCommand,
-} from '@aws-sdk/lib-dynamodb';
-import { Boat } from '../models/Boat';
-
-const REGION = 'us-east-1'; // update as needed
-const TABLE_NAME = 'Boats'; // update as needed
-
-const client = new DynamoDBClient({ region: REGION });
-const ddbDocClient = DynamoDBDocumentClient.from(client);
-
-export async function saveBoat(boat: Boat): Promise<void> {
-  const command = new PutCommand({
-    TableName: TABLE_NAME,
-    Item: boat.toItem(),
-  });
-
-  try {
-    await ddbDocClient.send(command);
-    console.log(`✅ Boat ${boat.name} saved to DynamoDB`);
-  } catch (err) {
-    console.error('❌ Error saving boat:', err);
-    throw err;
-  }
-}
-  */
