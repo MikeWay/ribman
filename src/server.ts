@@ -3,10 +3,12 @@ import { setRoutes } from './routes/index';
 import session from 'express-session';
 import cors from 'cors';
 import audit from 'express-requests-logger'
+import { Request, Response, NextFunction } from 'express';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+app.use(cookieParser()); // Middleware to parse cookies
 // Set up the view engine
 app.set('view engine', 'ejs');
 app.set('views', './views'); // Set the views directory
@@ -15,7 +17,7 @@ app.use(express.static('public')); // Serve static files from the public directo
 app.use('/public', express.static('public'));   
 
 // Middleware
-// app.use(audit()); enable request logging
+//app.use(audit()); //enable request logging
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Set up session management
@@ -32,9 +34,26 @@ const corsOptions = {
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
+
+
 app.use(cors(corsOptions));
 // Set up routes
 setRoutes(app);
+
+interface ErrorHandler {
+  (err: Error, req: Request, res: Response, next: NextFunction): void;
+}
+
+const errorHandler: ErrorHandler = (err, req, res, next) => {
+  //console.error(err.stack);
+  if(err.message === 'NOT-ADMIN') {
+    res.redirect(302, '/admin-login');
+  }
+  next();
+};
+
+app.use(errorHandler);
+
 
 // Start the server
 //app.use(cors(corsOptions));

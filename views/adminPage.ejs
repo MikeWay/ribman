@@ -1,14 +1,34 @@
-<h1>The Admin Page with some links</h1>
-<ul>
-    <li><a href="/admin">Admin Home</a></li>
-    <li>
-        <form action="/checkInAll" method="POST" style="display:inline;">
-            <button type="submit" style="background:none;border:none;padding:0;color:#007bff;text-decoration:underline;cursor:pointer;">
-                Check In All Boats
-            </button>
-        </form>
-    </li>
-    <li><a href="/report">Generate Log Reports</a></li>    
-    <li><a href="/admin/loadUsers">Upload Users CSV</a></li>
-    <li><a href="/admin/deleteAllUsers">Delete All Users</a></li>
-</ul>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="mb-4">The Admin Page with some links</h1>
+        <ul class="list-group">
+            <li class="list-group-item">
+                <a href="/admin" class="btn btn-link">Admin Home</a>
+            </li>
+            <li class="list-group-item">
+                <form action="/checkInAll" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-link p-0">
+                        Check In All Boats
+                    </button>
+                </form>
+            </li>
+            <li class="list-group-item">
+                <a href="/report" class="btn btn-link">Generate Log Reports</a>
+            </li>
+            <li class="list-group-item">
+                <a href="/admin/loadUsers" class="btn btn-link">Upload Users CSV</a>
+            </li>
+            <li class="list-group-item">
+                <a href="/admin/deleteAllUsers-REMOVE-THIS" class="btn btn-link text-danger">Delete All Users -- Don't do it!</a>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

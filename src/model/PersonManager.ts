@@ -14,6 +14,16 @@ const REGION = Config.getInstance().get('region');
 
 
 export class PersonManager {
+    getAdminByEmailAndPassword(email: string, password: string): Person {
+        console.log('Need real validation of email and password');
+        // TODO - implement real validation of email and password
+        // For now, return a dummy admin person if the email and password match
+        if(email === 'dogsbody@exe-sailing-club.org' && password === 'password123') {
+            return new Person('666', 'Dogs', 'Body', 1, 1, 1970);
+        }
+        throw new Error('Invalid email or password');
+    }
+
     private client = new DynamoDBClient({ region: REGION });
 
     public setClient(client: DynamoDBClient): void {

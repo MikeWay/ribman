@@ -3,6 +3,8 @@ import { logManager } from "../model/LogManager";
 import { Request, Response } from 'express';
 import multer from 'multer';
 import { Person } from "../model/Person";
+import { RSA_PRIVATE_KEY } from "../api/server";
+import jwt from 'jsonwebtoken';
 
 // Extend Express Request type to include file property
 interface MulterRequest extends Request {
@@ -40,10 +42,47 @@ export class AdminController {
     }
 
     public getHome(req: Request, res: Response): void {
+
         res.locals.pageBody = 'adminPage';
         req.session.pageBody = res.locals.pageBody;
         // render the page1 view with the usernames 
-        res.render('index', { title: 'Admin' });
+        res.render('adminPage', { title: 'Admin' });
+    }
+
+    public adminLogin(req: Request, res: Response): void {
+        res.locals.pageBody = 'adminLogin';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminLogin view
+        res.render('adminLogin', { title: 'Admin' });
+    }
+
+    // method to handle admin login
+    public async login(req: Request, res: Response): Promise<void> {
+        const { email, password } = req.body;       
+        try {
+            const admin = await dao.personManager.getAdminByEmailAndPassword(email, password);
+            if (admin) {
+                //req.session.user = admin; // Store user in session
+                // create a jwt token for the admin
+
+
+        const jwtBearerToken = jwt.sign({isAdmin: true}, RSA_PRIVATE_KEY, {
+                algorithm: 'RS256',
+            });
+
+
+
+            res.cookie('jwt', jwtBearerToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+
+            //res.redirect(301,'/admin'); // Redirect to admin home
+this.getHome(req, res); // Render the admin home page         
+            } else {
+                res.status(401).json({ error: 'Invalid email or password' });
+            }
+        } catch (error) {
+            console.error('Error during admin login:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
 
     public loadUsers(req: Request, res: Response): void {

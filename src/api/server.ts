@@ -12,7 +12,7 @@ console.log("Current directory:", __dirname);
 import path from 'path';
 const absolutePath = path.resolve(__dirname, '../keys/private.key');
 console.log("Absolute path to private key:", absolutePath);
-const RSA_PRIVATE_KEY = fs.readFileSync(absolutePath, 'utf8');
+export const RSA_PRIVATE_KEY = fs.readFileSync(absolutePath, 'utf8');
 
 class ApiServer {
   constructor() {
@@ -101,7 +101,7 @@ class ApiServer {
 
         const jwtBearerToken = jwt.sign({}, RSA_PRIVATE_KEY, {
                 algorithm: 'RS256',
-                expiresIn: 120,
+                //expiresIn: 120,
                 subject: userId
             });
 
