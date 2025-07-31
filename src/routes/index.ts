@@ -43,18 +43,43 @@ export function setRoutes(app: any) {
 
 
 
-const checkIfAuthenticated = expressjwt({
-    secret: RSA_PUBLIC_KEY,
-    algorithms: ['RS256'],
-    getToken: (req) => {
-
-        const token = req.headers.authorization?.split(' ')[1];
-        return token || undefined;
-
-
+// const checkIfAuthenticated = expressjwt({
+//     secret: RSA_PUBLIC_KEY,
+//     algorithms: ['RS256']
+// });
+function checkIfAuthenticated(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    req.headers.authorization = req.headers.authorization || '';
+    const token = req.headers.authorization.split(' ')[1];
+    if (!token) {
+        console.log('Unauthorized: No token provided');
+        return res.status(401).json({ error: 'Unauthorized' });
     }
-});
-
+    // Verify the JWT token
+    jwt.verify(
+        token,
+        RSA_PUBLIC_KEY,
+        (err, decoded) => {
+            if (err) {
+                console.error('JWT verification failed:', err);
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+            // If the token is valid, proceed
+            // console.log('Decoded JWT:', decoded);
+            if (typeof decoded !== 'object' || decoded === null) {
+                console.error('Decoded JWT is not an object:', decoded);
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+            // Attach the decoded token to the request object
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (req as any).user = decoded;
+        }
+    );
+    next();
+}
 
 interface AuthCookiePayload {
     isAdmin?: boolean;
