@@ -10,6 +10,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { Config } from "./Config";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { Person } from "./Person";
 
 
 const TABLE_NAME = 'Boats'; // update as needed
@@ -88,7 +89,7 @@ export class BoatManager {
     return boats.filter(boat => !boat.isAvailable);
   }
 
-  async checkOutBoat(theBoat: Boat): Promise<boolean> {
+  async checkOutBoat(theBoat: Boat, user: Person, reason: string): Promise<boolean> {
     // Check if the boat is available and mark it as checked out
     if (!theBoat || typeof theBoat.id !== 'string') {
       console.error('Invalid boat provided to checkOutBoat:', theBoat);
@@ -109,8 +110,8 @@ export class BoatManager {
     }
     // Mark the boat as checked out
     existingBoat.isAvailable = false;
-    existingBoat.checkedOutTo = theBoat.checkedOutTo; // Assuming checkedOutTo is set in the Boat object
-    existingBoat.checkedOutAt = new Date(); // Set the current date as checked out time
+    existingBoat.checkedOutTo = user.firstName + " " + user.lastName; // Assuming checkedOutTo is set in the Boat object
+    existingBoat.checkedOutAt = new Date().getTime(); // Set the current date as checked out time
     existingBoat.checkedInAt = null; // Reset checked-in time 
     // Save the updated boat back to DynamoDB
 

@@ -24,7 +24,39 @@ export class AdminController {
             // Your logic here
             logManager.listLogEntries()
                 .then((logs) => {
-                    res.status(200).json(logs);
+                    const csvRows = [];
+                    const headers = ["boatName", "personName", "checkOutDateTime", "checkInDateTime", "checkOutReason"];
+                    csvRows.push(headers.join(','));
+                    for (const log of logs) {
+                        // Convert log entry to CSV row
+                        // Ensure to handle any potential undefined/null values
+                        // Convert checkOutDateTime and checkInDateTime to a readable format
+                        const formattedCheckOutDateTime = log.checkOutDateTime ? new Date(log.checkOutDateTime).toISOString() : '';
+                        const formattedCheckInDateTime = log.checkInDateTime ? new Date(log.checkInDateTime).toISOString() : '';
+                        // Create a CSV row
+                        // Escape quotes in the log values
+                        // Create a row with escaped values
+                        // Ensure to handle any potential undefined/null values
+                        // Use map to create a row with escaped values
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars   
+                        const row = headers.map(h => {
+                            if (h === 'checkOutDateTime') {
+                                return `"${formattedCheckOutDateTime.replace(/"/g, '""')}"`;
+                            }
+                            if (h === 'checkInDateTime') {
+                                return `"${formattedCheckInDateTime.replace(/"/g, '""')}"`;
+                            }
+                            return `"${(log[h] ?? '').toString().replace(/"/g, '""')}"`;
+                        });
+                        csvRows.push(row.join(','));
+                    }
+                    res.setHeader('Content-Type', 'text/csv');
+                    res.status(200)
+                        .setHeader('Content-Disposition', 'attachment; filename="log_report.csv"')
+                        .send(csvRows.join('\n'));
+                    res.end();
+                    // Optionally, you can log or set a message after sending the file
+                    console.log('CSV log report sent successfully.');
                 })
                 .catch((error) => {
                     console.error('Error fetching logs:', error);

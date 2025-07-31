@@ -11,7 +11,9 @@ export interface LogEntryItem {
 }
 
 
-export class LogEntry implements LogEntryItem{
+export class LogEntry implements LogEntryItem {
+    [key: string]: any; // Indexed signature
+
     logKey: string; 
     boatName?: string;
     boatId?: string;
@@ -37,14 +39,6 @@ export class LogEntry implements LogEntryItem{
         }
     }
 
-    // constructor(boatName: string, checkOutDateTime: Date, defect: Defect | null) {
-    //     // Initialize the properties of the LogEntry
-    //     this.logKey = `${boatName}-${new Date().toISOString()}`;
-    //     this.boatName = boatName;
-    //     this.checkOutDateTime = checkOutDateTime;
-    //     this.defect = defect;
-    // }
-
     public toItem(): {
         logKey: string;
         boatName: string;
@@ -69,5 +63,4 @@ export class LogEntry implements LogEntryItem{
         Check Out DateTime: ${this.checkOutDateTime}, Check In DateTime: ${this.checkInDateTime}, 
         Check Out Reason: ${this.checkOutReason}, Defect: ${this.defect ? this.defect : 'No Defect'}`;
     }
-
 }

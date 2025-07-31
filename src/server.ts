@@ -12,7 +12,7 @@ app.use(cookieParser()); // Middleware to parse cookies
 // Set up the view engine
 app.set('view engine', 'ejs');
 app.set('views', './views'); // Set the views directory
-app.use(express.static('public')); // Serve static files from the public directory
+app.use(express.static('public/browser')); // Serve static files from the public directory
 // Set up the public directory for static files
 app.use('/public', express.static('public'));   
 

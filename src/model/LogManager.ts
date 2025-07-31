@@ -36,7 +36,13 @@ export class LogManager {
         const result = await docClient.send(command);
         //const items =  as LogEntryItem[];
 
-        return (result.Items ?? []).map((item) => new LogEntry(unmarshall(item)));
+        return (result.Items ?? [])
+            .map((item) => new LogEntry(unmarshall(item)))
+            .sort((a, b) => {
+                const dateA = a.checkOutDateTime ?? 0;
+                const dateB = b.checkOutDateTime ?? 0;
+                return dateA - dateB;
+            });
     }
 }
 

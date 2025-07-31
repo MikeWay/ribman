@@ -5,8 +5,9 @@ export class Boat {
     name: string = '';
     isAvailable: boolean = true;
     checkedOutTo: string | null = null;
-    checkedOutAt: Date | null = null;
-    checkedInAt: Date | null = null;
+    checkedOutAt: number | null = null;
+    checkedInAt: number | null = null;
+    checkOutReason: string | null = null;
     constructor(id?: string, name?: string, isAvailable: boolean = true) {
         this.id = id ?? '';
         this.name = name ?? '';
@@ -19,11 +20,15 @@ export class Boat {
         return `Boat ID: ${this.id}, Name: ${this.name}, Available: ${this.isAvailable}`;
     }
 
-    toItem(): { id: string; name: string; isAvailable: boolean } {
+    toItem(): { id: string; name: string; isAvailable: boolean, checkedOutTo?: string | null, checkedOutAt?: number | null, checkedInAt?: number | null, checkOutReason?: string | null } {
         return {
           id: this.id,
           name: this.name,
           isAvailable: this.isAvailable,
+          checkedOutTo: this.checkedOutTo,
+          checkedOutAt: this.checkedOutAt,
+          checkedInAt: this.checkedInAt,
+          checkOutReason: this.checkOutReason,
         };
       }
 
@@ -33,8 +38,9 @@ export class Boat {
         name: string,
         isAvailable: boolean,
         checkedOutTo?: string | null,
-        checkedOutAt?: Date | null,
-        checkedInAt?: Date | null
+        checkedOutAt?: number | null,
+        checkedInAt?: number | null,
+        checkOutReason?: string | null  
 
     }): Boat {
         const boat = new Boat(

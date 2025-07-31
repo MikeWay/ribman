@@ -10,6 +10,7 @@ import * as fs from 'fs';
 console.log("Current directory:", __dirname);
 // convert the relative path to an absolute path
 import path from 'path';
+import { LogEntry } from "../model/log";
 const absolutePath = path.resolve(__dirname, '../keys/private.key');
 console.log("Absolute path to private key:", absolutePath);
 export const RSA_PRIVATE_KEY = fs.readFileSync(absolutePath, 'utf8');
@@ -55,13 +56,22 @@ class ApiServer {
   public async checkOutBoat(req: Request, res: Response) {
     const boat: Boat = req.body.boat;
     const user: Person = req.body.user;
+    const reason: string = req.body.reason || 'No reason provided';
 
     // check out the boat
     try {
       boat.checkedOutTo = user.id;
-      boat.checkedOutAt = new Date();
+      boat.checkedOutAt = new Date().getTime(); // Set the current date as checked out time
       boat.checkedInAt = null; // Reset checked-in time
-      await dao.boatManager.checkOutBoat(boat);
+      await dao.boatManager.checkOutBoat(boat, user, reason);
+      const logEntry = new LogEntry({
+        boatName: boat.name,
+        personName: user.firstName + " " + user.lastName,
+        checkOutDateTime: boat.checkedOutAt,
+        checkOutReason: reason,
+        logKey: `${boat.name}-${new Date().toISOString()}`
+      });
+      await dao.logManager.saveLogEntry(logEntry);
       return res.status(200).json({ message: "Boat checked out successfully" });
     } catch (error) {
       console.error("Error checking out boat:", error);
