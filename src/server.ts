@@ -14,7 +14,7 @@ app.set('view engine', 'ejs');
 app.set('views', './views'); // Set the views directory
 app.use(express.static('public/browser')); // Serve static files from the public directory
 // Set up the public directory for static files
-app.use('/public', express.static('public'));   
+//app.use('/public', express.static('public'));   
 
 // Middleware
 //app.use(audit()); //enable request logging

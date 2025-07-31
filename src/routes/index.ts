@@ -24,7 +24,7 @@ const navigationController = new NavigationController()
 
 export function setRoutes(app: any) {
     app.use('/', router);
-    router.get('/', indexController.getHome.bind(indexController));
+    //router.get('/', indexController.getHome.bind(indexController));
     router.post('/navigate', navigationController.navigate.bind(navigationController));
     router.get('/report', adminController.genLogReports.bind(adminController));
     router.get('/admin', checkIfAdminAuthenticated, adminController.getHome.bind(adminController));
