@@ -11,6 +11,7 @@ console.log("Current directory:", __dirname);
 // convert the relative path to an absolute path
 import path from 'path';
 import { LogEntry } from "../model/log";
+import { DefectType } from "../model/defect";
 const absolutePath = path.resolve(__dirname, '../keys/private.key');
 console.log("Absolute path to private key:", absolutePath);
 export const RSA_PRIVATE_KEY = fs.readFileSync(absolutePath, 'utf8');
@@ -52,6 +53,23 @@ class ApiServer {
       return res.status(500).json({ error: "Internal server error" });
     }
   }
+
+  public async checkInBoat(req: Request, res: Response) {
+    const boat: Boat = req.body.boat;
+    const checkInByUser: Person = req.body.user;
+    const defects: DefectType[] = req.body.problems || [];
+    const additionalInfo: string = req.body.additionalInfo || '';
+
+    try {
+      await dao.checkInBoat(boat, checkInByUser, defects, additionalInfo);
+      return res.status(200).json({ message: "Boat checked in successfully" });
+    } catch (error) {
+      console.error("Error checking in boat:", error);
+      return res.status(500).json({ error: "Failed to check in boat" });
+    }
+  }
+
+
   /** request includes: boat: Boat and user: Person  */
   public async checkOutBoat(req: Request, res: Response) {
     const boat: Boat = req.body.boat;
@@ -100,6 +118,17 @@ class ApiServer {
       return res.status(500).json({ error: "Failed to fetch checked out boats" });
     }
   } 
+
+  public async getPossibleDefectsList(req: Request, res: Response) {
+    try {
+      const defects = await dao.getPossibleDefectsList();
+      return res.status(200).json(defects);
+    } catch (error) {
+      console.error("Error fetching possible defects:", error);
+      return res.status(500).json({ error: "Failed to fetch possible defects" });
+    }
+  }
+
 
   public login(req: Request, res: Response) {
 

@@ -8,11 +8,15 @@ export class Boat {
     checkedOutAt: number | null = null;
     checkedInAt: number | null = null;
     checkOutReason: string | null = null;
-    constructor(id?: string, name?: string, isAvailable: boolean = true) {
+    constructor(id?: string, name?: string, isAvailable: boolean = true, checkedOutTo?: string | null, checkedOutAt?: number | null, checkedInAt?: number | null, checkOutReason?: string | null) {
         this.id = id ?? '';
         this.name = name ?? '';
         this.isAvailable = isAvailable;
-        }
+        this.checkedOutTo = checkedOutTo ?? null;
+        this.checkedOutAt = checkedOutAt ?? null;
+        this.checkedInAt = checkedInAt ?? null;
+        this.checkOutReason = checkOutReason ?? null;
+    }
 // export class Boat {
 
 

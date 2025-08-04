@@ -167,7 +167,7 @@ export class BoatManager {
       }
       return (result.Items || []).map((item) => {
         const unmarshalled = unmarshall(item);
-        return new Boat(unmarshalled.id, unmarshalled.name, unmarshalled.isAvailable);
+        return new Boat(unmarshalled.id, unmarshalled.name, unmarshalled.isAvailable, unmarshalled.checkedOutTo, unmarshalled.checkedOutAt, unmarshalled.checkedInAt, unmarshalled.checkOutReason);
       });
       //return (result.Items || []).map((item) => new Boat(unmarshall(item) as Boat));
     } catch (err) {

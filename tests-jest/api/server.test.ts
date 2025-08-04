@@ -1,6 +1,6 @@
 
 import express, { Request, Response } from 'express';
-import fetch from 'node-fetch';
+//import fetch from 'node-fetch';
 import { Server } from 'http';
 
 const app = express();
@@ -11,7 +11,8 @@ const apiServer = {
   checkPerson: jest.fn(),
   getCheckedOutBoats: jest.fn(),
   checkOutBoat: jest.fn(),
-  getAvailableBoats: jest.fn()
+  getAvailableBoats: jest.fn(),
+  checkInBoat: jest.fn()
 };
 
 let server: Server;
@@ -36,7 +37,9 @@ describe('ApiServer.checkPerson', () => {  beforeEach(() => {
     (dao.personManager.getPersonByLastNameAndBirthDate as jest.Mock).mockResolvedValueOnce(people);
 
     const body = { familyInitial: 'A', day: 10, month: 6, year: 1990 };
-    const res = await fetch(`http://localhost:${server.address().port}/api/checkPerson`, {
+    const address = server.address();
+    const port = address && typeof address === 'object' && 'port' in address ? (address as any).port : 0;
+    const res = await fetch(`http://localhost:${port}/api/checkPerson`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -54,7 +57,9 @@ describe('ApiServer.checkPerson', () => {  beforeEach(() => {
 
     const now = new Date();
     const body = { familyInitial: 'B', year: 2000 };
-    const res = await fetch(`http://localhost:${server.address().port}/api/checkPerson`, {
+    const address = server.address();
+    const port = address && typeof address === 'object' && 'port' in address ? (address as any).port : 0;
+    const res = await fetch(`http://localhost:${port}/api/checkPerson`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -75,14 +80,16 @@ describe('ApiServer.checkPerson', () => {  beforeEach(() => {
     (dao.personManager.getPersonByLastNameAndBirthDate as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
 
     const body = { familyInitial: 'C', day: 1, month: 1, year: 2020 };
-    const res = await fetch(`http://localhost:${server.address().port}/api/checkPerson`, {
+    const address = server.address();
+    const port = address && typeof address === 'object' && 'port' in address ? (address as any).port : 0;
+    const res = await fetch(`http://localhost:${port}/api/checkPerson`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
 
     expect(res.status).toBe(500);
-    const data = await res.json();
+    const data = await res.json() as { error: string };
     expect(data.error).toBe('Internal server error');
   });
 });
@@ -97,8 +104,9 @@ describe('ApiServer.getCheckedOutBoats', () => {
       { id: 3, name: 'Red Rib', checkedOutTo: 42, checkedOutAt: new Date(), checkedInAt: null }
     ];
     (dao.boatManager.getCheckedOutBoats as jest.Mock).mockResolvedValueOnce(boats);
-
-    const res = await fetch(`http://localhost:${server.address().port}/api/getCheckedOutBoats`, {
+    const address = server.address();
+    const port = address && typeof address === 'object' && 'port' in address ? (address as any).port : 0;
+    const res = await fetch(`http://localhost:${port}/api/getCheckedOutBoats`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -111,15 +119,17 @@ describe('ApiServer.getCheckedOutBoats', () => {
 
   it('should handle errors when fetching checked out boats', async () => {
     (dao.boatManager.getCheckedOutBoats as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
-
-    const res = await fetch(`http://localhost:${server.address().port}/api/getCheckedOutBoats`, {
+    const address = server.address();
+    const port = address && typeof address === 'object' && 'port' in address ? (address as any).port : 0;
+    const res = await fetch(`http://localhost:${port}/api/getCheckedOutBoats`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });
 
     expect(res.status).toBe(500);
-    const data = await res.json();
-    expect(data.error).toBe('Failed to fetch checked out boats');
+    const data = await res.json() as { error: string };
+    expect(data.error).toBe('Internal server error');
+
   });
 });
 describe('ApiServer.checkOutBoat', () => {
@@ -133,8 +143,9 @@ describe('ApiServer.checkOutBoat', () => {
     const boat = { id: 10, name: 'Blue Canoe' };
     const user = { id: 5, name: 'Charlie' };
     const body = { boat, user };
-
-    const res = await fetch(`http://localhost:${server.address().port}/api/checkOutBoat`, {
+    const address = server.address();
+    const port = address && typeof address === 'object' && 'port' in address ? (address as any).port : 0;
+    const res = await fetch(`http://localhost:${port}/api/checkOutBoat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -156,15 +167,16 @@ describe('ApiServer.checkOutBoat', () => {
     const boat = { id: 11, name: 'Green Kayak' };
     const user = { id: 6, name: 'Dana' };
     const body = { boat, user };
-
-    const res = await fetch(`http://localhost:${server.address().port}/api/checkOutBoat`, {
+    const address = server.address();
+    const port = address && typeof address === 'object' && 'port' in address ? (address as any).port : 0;
+    const res = await fetch(`http://localhost:${port}/api/checkOutBoat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
 
     expect(res.status).toBe(500);
-    const data = await res.json();
+    const data = await res.json()  as { error: string };;
     expect(data.error).toBe('Failed to check out boat');
   });
 });
@@ -179,8 +191,9 @@ describe('ApiServer.getAvailableBoats', () => {
       { id: 20, name: 'Yellow Dinghy', checkedOutTo: null }
     ];
     (dao.boatManager.getAvailableBoats as jest.Mock).mockResolvedValueOnce(boats);
-
-    const res = await fetch(`http://localhost:${server.address().port}/api/getAvailableBoats`, {
+    const address = server.address();
+    const port = address && typeof address === 'object' && 'port' in address ? (address as any).port : 0;
+    const res = await fetch(`http://localhost:${port}/api/getAvailableBoats`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -193,17 +206,74 @@ describe('ApiServer.getAvailableBoats', () => {
 
   it('should handle errors when fetching available boats', async () => {
     (dao.boatManager.getAvailableBoats as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
-
-    const res = await fetch(`http://localhost:${server.address().port}/api/getAvailableBoats`, {
+    const address = server.address();
+    const port = address && typeof address === 'object' && 'port' in address ? (address as any).port : 0;
+    const res = await fetch(`http://localhost:${port}/api/getAvailableBoats`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });
 
     expect(res.status).toBe(500);
-    const data = await res.json();
+    const data = await res.json() as { error: string };
     expect(data.error).toBe('Failed to fetch available boats');
   });
 });
+describe('ApiServer.checkInBoat', () => {
+  beforeEach(() => {
+    dao.checkInBoat = jest.fn();
+  });
+
+  it('should check in a boat successfully', async () => {
+    (dao.checkInBoat as jest.Mock).mockResolvedValueOnce(undefined);
+
+    const boat = { id: 100, name: 'Silver Skiff' };
+    const user = { id: 7, name: 'Eve' };
+    const problems = [{ type: 'scratch', description: 'Minor scratch on hull' }];
+    const body = { boat, user, problems };
+    const address = server.address();
+    const port = address && typeof address === 'object' && 'port' in address ? (address as any).port : 0;
+    const res = await fetch(`http://localhost:${port}/api/checkInBoat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data).toEqual({ message: "Boat checked in successfully" });
+    expect(dao.checkInBoat).toHaveBeenCalled();
+    const [calledBoat, calledUser, calledCheckInDateTime, calledDefects] = (dao.checkInBoat as jest.Mock).mock.calls[0];
+    expect(calledBoat).toEqual(boat);
+    expect(calledUser).toEqual(user);
+    expect(typeof calledCheckInDateTime).toBe('number');
+    expect(calledDefects).toEqual(problems);
+  });
+
+  it('should handle errors when checking in a boat', async () => {
+    (dao.checkInBoat as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
+
+    const boat = { id: 101, name: 'Golden Gig' };
+    const user = { id: 8, name: 'Frank' };
+    const body = { boat, user };
+    const address = server.address();
+    const port = address && typeof address === 'object' && 'port' in address ? (address as any).port : 0;
+    const res = await fetch(`http://localhost:${port}/api/checkInBoat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    expect(res.status).toBe(500);
+    const data = await res.json() as { error: string };
+    expect(data.error).toBe('Failed to check in boat');
+  });
+});
+
+// Add the route to the test app if not already present
+if (!app._router.stack.some((layer: any) => layer.route && layer.route.path === '/api/checkInBoat')) {
+  
+  app.post('/api/checkInBoat', (req: Request, res: Response) => apiServer.checkInBoat(req, res));
+}
 
 // Add the routes to the test app if not already present
 if (!app._router.stack.some((layer: any) => layer.route && layer.route.path === '/api/checkOutBoat')) {

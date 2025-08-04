@@ -34,8 +34,10 @@ export function setRoutes(app: any) {
     router.post('/admin/upload-users', checkIfAdminAuthenticated, upload.single('csvFile'), adminController.uploadUsers.bind(adminController));
     router.post('/api/check-person', checkIfAuthenticated, apiServer.checkPerson.bind(apiServer));
     router.post('/api/check-out-boat', checkIfAuthenticated, apiServer.checkOutBoat.bind(apiServer));
+    router.post('/api/check-in-boat', checkIfAuthenticated, apiServer.checkInBoat.bind(apiServer));
     router.get('/api/available-boats', checkIfAuthenticated, apiServer.getAvailableBoats.bind(apiServer));
     router.get('/api/checked-out-boats', checkIfAuthenticated, apiServer.getCheckedOutBoats.bind(apiServer));
+    router.get('/api/defects-list', checkIfAuthenticated, apiServer.getPossibleDefectsList.bind(apiServer));
     router.post('/api/login', apiServer.login.bind(apiServer));
     router.get('/admin-login', adminController.adminLogin.bind(adminController));
     router.post('/admin/login', adminController.login.bind(adminController));

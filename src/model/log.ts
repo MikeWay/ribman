@@ -1,4 +1,3 @@
-import { Defect } from "./defect";
 
 export interface LogEntryItem {
     logKey?: string;
