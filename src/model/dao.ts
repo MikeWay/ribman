@@ -6,6 +6,7 @@ import { LogManager, logManager } from "./LogManager";
 import { Person } from "./Person";
 import { PersonManager } from "./PersonManager"; // Adjusted the path to the correct location
 import { DefectManager } from "./DefectManager";
+import { AdminPersonManager } from "./AdminPersonManager";
 
 export class DataAccessObject {
 
@@ -13,24 +14,19 @@ export class DataAccessObject {
     public personManager: PersonManager;
     public logManager: LogManager; // Placeholder for LogManager, adjust as needed
     public defectManager: DefectManager;
+    public adminPersonManager: AdminPersonManager; // Placeholder for admin person manager, adjust as needed
+
     constructor() {
         // Initialize the boat manager and person manager
         this.boatManager = new BoatManager();
         this.personManager = new PersonManager();
         this.logManager = logManager;
         this.defectManager = new DefectManager();
+        this.adminPersonManager = new AdminPersonManager();
         //this.initialize();
     }
     
-    // public async initialize(): Promise<void> {
-    //     try {
-    //         await this.boatManager.initialize();
-    //         //await this.personManager.initialize();
-    //         console.log('DAO initialized successfully');
-    //     } catch (error) {
-    //         console.error('Error initializing DAO:', error);
-    //     }
-    // }
+
 
     public async checkInBoat(boat: Boat, checkInByUser: Person, defects: DefectType[], additionalInfo?: string): Promise<void>    {
         if (!boat || !checkInByUser) {
@@ -38,17 +34,7 @@ export class DataAccessObject {
         }
         const checkInDateTime = new Date().getTime(); // Current timestamp
         // Create a log entry for the check-in
-        const logEntry = new LogEntry({
-            boatName: boat.name,
-            personName: checkInByUser.firstName + " " + checkInByUser.lastName,
-            checkInDateTime: checkInDateTime,
-            defect: defects.map(d => d.name).join(', '), // Join defect names into a string
-            additionalInfo: additionalInfo || '',
-            logKey: `${boat.name}-${new Date().toISOString()}`
-        });
 
-        // Save the log entry
-        this.logManager.saveLogEntry(logEntry);
 
         // Update the boat's status to available
         boat.isAvailable = true;
@@ -58,7 +44,7 @@ export class DataAccessObject {
         await this.defectManager.saveDefectsForBoat(defectsForBoat);
 
         // Save the updated boat
-        return this.boatManager.saveBoat(boat);
+        return this.boatManager.saveBoat(Boat.fromItem(boat));
       throw new Error("Method not implemented.");
     }    
 

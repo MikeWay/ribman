@@ -11,34 +11,54 @@ interface MulterRequest extends Request {
     file?: Express.Multer.File;
 }
 
-
 export class AdminController {
-    
+
     constructor() {
         // Initialization code if needed
     }
 
-    // Example method
+    public adminLogin(req: Request, res: Response): void {
+        res.locals.pageBody = 'adminLogin';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminLogin view
+        res.render('adminLogin', { title: 'Admin' });
+    }
+
+    public async checkInAllBoats(req: Request, res: Response): Promise<void> {
+        // TODO: Implement the logic for checking in all boats
+        await dao.boatManager.checkInAllBoats();
+        res.status(200).json({ message: 'All boats checked in.' });
+    }
+
+    deleteAllUsers(req: Request, res: Response): void {
+        dao.personManager.deleteAllPersons()
+            .then(() => {
+                res.status(200).json({ message: 'All users deleted successfully.' });
+            })
+            .catch((error) => {
+                console.error('Error deleting all users:', error);
+                res.status(500).json({ error: 'Failed to delete all users' });
+            });
+    }
+
+    public getHome(req: Request, res: Response): void {
+        res.locals.pageBody = 'adminPage';
+        req.session.pageBody = res.locals.pageBody;
+        // render the page1 view with the usernames 
+        res.render('adminPage', { title: 'Admin' });
+    }
+
     public async genLogReports(req: Request, res: Response): Promise<void> {
         try {
             // Your logic here
             logManager.listLogEntries()
                 .then((logs) => {
                     const csvRows = [];
-                    const headers = ["boatName", "personName", "checkOutDateTime", "checkInDateTime", "checkOutReason"];
+                    const headers = ["action", "boatName", "personName", "checkOutDateTime", "checkInDateTime", "checkOutReason", "defect", "additionalInfo"];
                     csvRows.push(headers.join(','));
                     for (const log of logs) {
-                        // Convert log entry to CSV row
-                        // Ensure to handle any potential undefined/null values
-                        // Convert checkOutDateTime and checkInDateTime to a readable format
                         const formattedCheckOutDateTime = log.checkOutDateTime ? new Date(log.checkOutDateTime).toISOString() : '';
                         const formattedCheckInDateTime = log.checkInDateTime ? new Date(log.checkInDateTime).toISOString() : '';
-                        // Create a CSV row
-                        // Escape quotes in the log values
-                        // Create a row with escaped values
-                        // Ensure to handle any potential undefined/null values
-                        // Use map to create a row with escaped values
-                        // eslint-disable-next-line @typescript-eslint/no-unused-vars   
                         const row = headers.map(h => {
                             if (h === 'checkOutDateTime') {
                                 return `"${formattedCheckOutDateTime.replace(/"/g, '""')}"`;
@@ -55,7 +75,6 @@ export class AdminController {
                         .setHeader('Content-Disposition', 'attachment; filename="log_report.csv"')
                         .send(csvRows.join('\n'));
                     res.end();
-                    // Optionally, you can log or set a message after sending the file
                     console.log('CSV log report sent successfully.');
                 })
                 .catch((error) => {
@@ -67,77 +86,79 @@ export class AdminController {
         }
     }
 
-    public async checkInAllBoats(req: Request, res: Response): Promise<void> {
-        // TODO: Implement the logic for checking in all boats
-        await dao.boatManager.checkInAllBoats();
-        res.status(200).json({ message: 'All boats checked in.' });
-    }
-
-    public getHome(req: Request, res: Response): void {
-
-        res.locals.pageBody = 'adminPage';
+    public async listUsers(req: Request, res: Response): Promise<void> {
+        try {
+            res.locals.pageBody = 'adminListUsers';
+            // Fetch all users from the database
+            res.locals.users = await dao.adminPersonManager.getAllPersons();
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            res.locals.error = 'Failed to fetch users';
+        }
+        // Set the page body in the session
         req.session.pageBody = res.locals.pageBody;
-        // render the page1 view with the usernames 
-        res.render('adminPage', { title: 'Admin' });
-    }
-
-    public adminLogin(req: Request, res: Response): void {
-        res.locals.pageBody = 'adminLogin';
-        req.session.pageBody = res.locals.pageBody;
-        // render the adminLogin view
-        res.render('adminLogin', { title: 'Admin' });
+        // render the adminListUsers view
+        res.render('adminListUsers', { title: 'List Users', users: res.locals.users, error: res.locals.error });
     }
 
     // method to handle admin login
     public async login(req: Request, res: Response): Promise<void> {
-        const { email, password } = req.body;       
+        const { email, password } = req.body;
         try {
-            const admin = await dao.personManager.getAdminByEmailAndPassword(email, password);
-            if (admin) {
-                //req.session.user = admin; // Store user in session
+            const admin = await dao.adminPersonManager.getAdminByEmail(email);
+            const isValid = await admin?.validatePassword(password);
+            if (isValid) {
                 // create a jwt token for the admin
-
-
-        const jwtBearerToken = jwt.sign({isAdmin: true}, RSA_PRIVATE_KEY, {
-                algorithm: 'RS256',
-            });
-
-
-
-            res.cookie('jwt', jwtBearerToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
-
-            //res.redirect(301,'/admin'); // Redirect to admin home
-this.getHome(req, res); // Render the admin home page         
+                const jwtBearerToken = jwt.sign({ isAdmin: true }, RSA_PRIVATE_KEY, {
+                    algorithm: 'RS256',
+                });
+                res.cookie('jwt', jwtBearerToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+                this.getHome(req, res); // Render the admin home page         
             } else {
-                res.status(401).json({ error: 'Invalid email or password' });
+                res.render('error', { error: 'Invalid email or password' });
             }
         } catch (error) {
             console.error('Error during admin login:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            res.render('error', { error: 'Invalid email or password' });
         }
     }
 
-    public loadUsers(req: Request, res: Response): void {
+    public loadNewUsers(req: Request, res: Response): void {
         res.locals.pageBody = 'adminLoadUsers';
         req.session.pageBody = res.locals.pageBody;
         // render the adminLoadUsers view
         res.render('index', { title: 'Load Users' });
     }
-
-    deleteAllUsers(req: Request, res: Response): void {
-        dao.personManager.deleteAllPersons()
-            .then(() => {
-                res.status(200).json({ message: 'All users deleted successfully.' });
-            })
-            .catch((error) => {
-                console.error('Error deleting all users:', error);
-                res.status(500).json({ error: 'Failed to delete all users' });
-            });
+    public async inputAdminPassword(req: Request, res: Response): Promise<void> {
+        
+        const { email_address } = req.query as { email_address: string };
+        const admin = await dao.adminPersonManager.getAdminByEmail(email_address);
+        // Set the page body in the session
+        req.session.pageBody = res.locals.pageBody;        
+        //res.render('adminSetPassword', { title: 'Set Admin Password', email_address });
+        res.render('adminSetPassword', { title: 'Set Admin Password', email_address, user: admin, error: null });
     }
-    
+
+    public async setAdminPassword(req: Request, res: Response): Promise<void> {
+        const { email, password } = req.body;
+        try {
+            const admin = await dao.adminPersonManager.getAdminByEmail(email);
+            if (admin) {
+                // Update the admin's password
+                await admin.setPassword(password); // Assuming password is stored in plain text, which is not recommended
+                await dao.adminPersonManager.saveAdminPerson(admin);
+                res.status(200).json({ message: 'Password updated successfully' });
+            } else {
+                res.status(404).json({ error: 'Admin not found' });
+            }
+        } catch (error) {
+            console.error('Error updating password:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+
     // Method to handle file upload and process CSV data
     // Expect the CSV to have columns: id, firstName, lastName, dob
-    
     public async uploadUsers(req: MulterRequest, res: Response): Promise<void> {
         try {
             // handle file upload 
@@ -146,7 +167,7 @@ this.getHome(req, res); // Render the admin home page
                 res.render('index', { title: 'Error', message: 'No file uploaded' });
                 return;
             }
-            const csvData = req.file.buffer.toString('utf-8'); 
+            const csvData = req.file.buffer.toString('utf-8');
             // Process the CSV file from the buffer line by line
             const lines = csvData.split('\n').filter(line => line.trim() !== '');
             // Assuming the first line is the header
@@ -156,7 +177,6 @@ this.getHome(req, res); // Render the admin home page
                 const values = lines[i].split(',').map(v => v.trim());
                 if (values.length !== header.length) continue; // skip malformed lines
                 // split values[4] (e.g., "1990-01-01") into day, month, year
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const [year, month, day] = values[3].split('-').map(v => parseInt(v, 10));
                 // Create a new Person object
                 const person = new Person(values[0], values[1], values[2], month, day, year);
@@ -166,14 +186,12 @@ this.getHome(req, res); // Render the admin home page
 
             res.status(200).json({ message: 'Users uploaded successfully' });
 
-        }   catch (error) {
+        } catch (error) {
             console.error('Error uploading users:', error);
             res.status(500).json({ error: 'Failed to upload users' });
         }
     }
-    
+
 }
 
 export const adminController = new AdminController();
-
-

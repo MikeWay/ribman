@@ -19,17 +19,19 @@ console.log("Absolute path to public key:", absolutePath);
 const RSA_PUBLIC_KEY = fs.readFileSync(absolutePath, 'utf8');
 
 const router = Router();
-const indexController = new IndexController();
+
 const navigationController = new NavigationController()
 
 export function setRoutes(app: any) {
     app.use('/', router);
-    //router.get('/', indexController.getHome.bind(indexController));
     router.post('/navigate', navigationController.navigate.bind(navigationController));
     router.get('/report', adminController.genLogReports.bind(adminController));
     router.get('/admin', checkIfAdminAuthenticated, adminController.getHome.bind(adminController));
     router.post('/checkInAll', checkIfAdminAuthenticated, adminController.checkInAllBoats.bind(adminController));
-    router.get('/admin/loadUsers', checkIfAdminAuthenticated, adminController.loadUsers.bind(adminController));
+    router.get('/admin/listUsers', checkIfAdminAuthenticated, adminController.listUsers.bind(adminController));
+    router.get('/admin/set-password', checkIfAdminAuthenticated, adminController.inputAdminPassword.bind(adminController));
+    router.post('/admin/set-password', checkIfAdminAuthenticated, adminController.setAdminPassword.bind(adminController));
+    router.get('/admin/loadUsers', checkIfAdminAuthenticated, adminController.loadNewUsers.bind(adminController));
     router.get('/admin/deleteAllUsers', checkIfAdminAuthenticated, adminController.deleteAllUsers.bind(adminController));
     router.post('/admin/upload-users', checkIfAdminAuthenticated, upload.single('csvFile'), adminController.uploadUsers.bind(adminController));
     router.post('/api/check-person', checkIfAuthenticated, apiServer.checkPerson.bind(apiServer));

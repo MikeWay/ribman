@@ -12,7 +12,7 @@ export interface LogEntryItem {
 
 export class LogEntry implements LogEntryItem {
     [key: string]: any; // Indexed signature
-
+    action: string = 'check out'; // Default action
     logKey: string; 
     boatName?: string;
     boatId?: string;
@@ -23,6 +23,7 @@ export class LogEntry implements LogEntryItem {
     checkInDateTimeObj?: Date; // Optional Date object for convenience
     checkOutReason?: string;
     defect?: string;
+    additionalInfo?: string;
 
     constructor(init: Partial<LogEntry>) {
         Object.assign(this, init);
@@ -46,6 +47,8 @@ export class LogEntry implements LogEntryItem {
         checkInDateTime?: number;
         checkOutReason?: string;
         defect: string;
+        additionalInfo?: string;
+        action?: string;
     } {
         return {
             logKey: this.logKey,
@@ -54,12 +57,15 @@ export class LogEntry implements LogEntryItem {
             checkOutDateTime: this.checkOutDateTime,
             checkInDateTime: this.checkInDateTime,
             checkOutReason: this.checkOutReason ? this.checkOutReason : "",
-            defect: ""
+            defect: this.defect ? this.defect : "",
+            additionalInfo: this.additionalInfo ? this.additionalInfo : "",
+            action: this.action,    
         };
     }
     public toString(): string {
         return `LogEntry: Boat Name: ${this.boatName}, Person Name: ${this.personName}, 
         Check Out DateTime: ${this.checkOutDateTime}, Check In DateTime: ${this.checkInDateTime}, 
-        Check Out Reason: ${this.checkOutReason}, Defect: ${this.defect ? this.defect : 'No Defect'}`;
+        Check Out Reason: ${this.checkOutReason}, Defect: ${this.defect ? this.defect : 'No Defect'}, 
+        Additional Info: ${this.additionalInfo ? this.additionalInfo : 'No Additional Info'}`;
     }
 }

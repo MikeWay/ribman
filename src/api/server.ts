@@ -62,6 +62,20 @@ class ApiServer {
 
     try {
       await dao.checkInBoat(boat, checkInByUser, defects, additionalInfo);
+        const logEntry = new LogEntry({
+            action: 'check in',
+            boatName: boat.name,
+            personName: checkInByUser.firstName + " " + checkInByUser.lastName,
+            checkOutDateTime: boat.checkedOutAt === null ? undefined : boat.checkedOutAt, // Assuming this is the time when the boat was checked out
+            checkInDateTime: Date.now(),
+            checkOutReason: boat.checkOutReason === null ? undefined : boat.checkOutReason,
+            defect: defects.map(d => d.name).join(', '), // Join defect names into a string
+            additionalInfo: additionalInfo || '',
+            logKey: `${boat.name}-${new Date().toISOString()}`
+        });
+
+        // Save the log entry
+        dao.logManager.saveLogEntry(logEntry);      
       return res.status(200).json({ message: "Boat checked in successfully" });
     } catch (error) {
       console.error("Error checking in boat:", error);
@@ -78,11 +92,12 @@ class ApiServer {
 
     // check out the boat
     try {
-      boat.checkedOutTo = user.id;
+      boat.checkedOutTo = user;
       boat.checkedOutAt = new Date().getTime(); // Set the current date as checked out time
       boat.checkedInAt = null; // Reset checked-in time
       await dao.boatManager.checkOutBoat(boat, user, reason);
       const logEntry = new LogEntry({
+        action: 'check out',
         boatName: boat.name,
         personName: user.firstName + " " + user.lastName,
         checkOutDateTime: boat.checkedOutAt,

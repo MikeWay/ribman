@@ -5,9 +5,10 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc && cp src/keys/* dist/keys",
+    "build:prod": "tsc -p tsconfig.prod.json && cp src/keys/* dist/keys",
     "start": "cp src/keys/* dist/keys && node dist/server.js",
     "dev": "cp src/keys/* dist/keys && ts-node src/server.ts",
-    "devbuild": "cp src/keys/* dist/keys && tsc && ts-node src/server.ts",
+    "devbuild": "cp src/keys/* dist/keys && tsc -p tsconfig.json && ts-node src/server.ts",
     "lint": "eslint 'src/**/*.{ts,js}'",
     "test:e2e": "playwright test",
     "test": "jest"

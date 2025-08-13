@@ -1,34 +1,40 @@
 import { DynamoDBClient, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
-import { DefectsForBoat } from "./defect";
+import { DefectsForBoat, DefectType } from "./defect";
+
+import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { Config } from "./Config";
+import { environment } from "../environment";
+
+const TABLE_NAME = environment.DEFECTS_TABLE_NAME; // update as needed
+const REGION = Config.getInstance().get('region');
 
 export class DefectManager {
+
+      private client = new DynamoDBClient({ region: REGION });
+  private ddbDocClient = DynamoDBDocumentClient.from(this.client);
+  
     public async saveDefectsForBoat(defectsForBoat: DefectsForBoat): Promise<void> {
         // Implement the logic to save defects for a specific boat
-        const client = new DynamoDBClient({ region: "us-east-1" });
 
-        const params = {
-            TableName: "DefectsForBoats",
-            Item: {
-                boatId: { S: defectsForBoat.boatId },
-                defects: { S: JSON.stringify(defectsForBoat.defects) }
-            }
-        };
 
-        await client.send(new PutItemCommand(params));
+
+        const command = new PutCommand({
+            TableName: TABLE_NAME,
+            Item: defectsForBoat.toItem(), // Assuming DefectsForBoat has a toItem() method that returns the item structure
+        });
+        await this.ddbDocClient.send(command);
     }
 
     // load defects for a specific boat
     public async loadDefectsForBoat(boatId: string): Promise<DefectsForBoat | null> {
-        const client = new DynamoDBClient({ region: "us-east-1" });
-
-        const params = {
-            TableName: "DefectsForBoats",
+        const command = new GetItemCommand({
+            TableName: TABLE_NAME,
             Key: {
                 boatId: { S: boatId }
             }
-        };
+        });
 
-        const result = await client.send(new GetItemCommand(params));
+        const result = await this.ddbDocClient.send(command);
         if (result.Item) {
             return new DefectsForBoat(
                 JSON.parse(result.Item.defects.S ?? "[]"),
@@ -40,3 +46,36 @@ export class DefectManager {
         return null;
     }
 }
+
+      
+
+
+    (async () => {
+        console.log("DefectManager example running...");
+        const manager = new DefectManager();
+    
+        // Example: Save defects for a boat
+        await manager.saveDefectsForBoat({
+            boatId: "boat123",
+            defects: [{
+                id: 1, description: "Broken rudder",
+                name: ""
+            }],
+            additionalInfo: "Urgent repair needed",
+            timestamp: Date.now(),
+            toItem: function (): { defects: DefectType[]; boatId: string; additionalInfo?: string; timestamp: number; } {
+                return {
+                    defects: this.defects,
+                    boatId: this.boatId,
+                    additionalInfo: this.additionalInfo,
+                    timestamp: this.timestamp
+                };
+            }
+        });
+    
+        // Example: Load defects for a boat
+        //const defects = await manager.loadDefectsForBoat("boat123");
+        //console.log(defects);
+    })();
+
+

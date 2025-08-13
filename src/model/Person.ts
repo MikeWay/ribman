@@ -1,3 +1,4 @@
+
 // Class representing a person in the system
 export class Person {
     id: string; // Unique identifier for the person
@@ -7,6 +8,7 @@ export class Person {
     birthDay: number; // Birth day of the person
     birthYear?: number; // Optional birth year of the person
     searchKey?: string; // Optional search key for quick lookups
+
 
     constructor(
         id: string,
@@ -25,6 +27,7 @@ export class Person {
         this.searchKey = `${lastName.toLowerCase().charAt(0)}-${birthDay}-${birthMonth}`;
     }
 
+
     // toItem method to convert the person object to a format suitable for DynamoDB
     toItem(): {
         id: string,
@@ -42,7 +45,7 @@ export class Person {
             birthMonth: this.birthMonth,
             birthDay: this.birthDay,
             birthYear: this.birthYear,
-            search_key: this.searchKey
+            search_key: this.searchKey,
         };
     }
 
@@ -53,9 +56,10 @@ export class Person {
         lastName: string,
         birthMonth: number,
         birthDay: number,
-        birthYear?: number
+        birthYear?: number,
+        search_key?: string,
     }): Person {
-        return new Person(
+        const person = new Person(
             item.id,
             item.firstName,
             item.lastName,
@@ -63,5 +67,7 @@ export class Person {
             item.birthDay,
             item.birthYear
         );
-    }       
+        person.searchKey = item.search_key;
+        return person;
+    }
 }

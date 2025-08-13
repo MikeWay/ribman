@@ -1,5 +1,5 @@
 import express from 'express';
-import { setRoutes } from './routes/index';
+import { setRoutes } from './routes/routes';
 import session from 'express-session';
 import cors from 'cors';
 import audit from 'express-requests-logger'

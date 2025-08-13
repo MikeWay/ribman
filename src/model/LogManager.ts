@@ -3,9 +3,10 @@ import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { Config } from '../model/Config';
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { environment } from "../environment";
 
-const LOG_TABLE_NAME = Config.getInstance().get('LOG_TABLE_NAME');
-const REGION = Config.getInstance().get('region');
+const LOG_TABLE_NAME = environment.LOG_TABLE_NAME;
+const REGION = environment.region || Config.getInstance().get('region'); // Use environment variable or fallback to config
 const client = new DynamoDBClient({ region: REGION });
 const docClient = DynamoDBDocumentClient.from(client);
 

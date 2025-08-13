@@ -14,6 +14,9 @@ const REGION = Config.getInstance().get('region');
 
 
 export class PersonManager {
+    getAllPersons() {
+        throw new Error("Method not implemented.");
+    }
     getAdminByEmailAndPassword(email: string, password: string): Person {
         console.log('Need real validation of email and password');
         // TODO - implement real validation of email and password

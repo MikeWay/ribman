@@ -11,9 +11,10 @@ import {
 import { Config } from "./Config";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { Person } from "./Person";
+import { environment } from "../environment";
 
 
-const TABLE_NAME = 'Boats'; // update as needed
+const TABLE_NAME = environment.BOAT_TABLE_NAME; // update as needed
 const REGION = Config.getInstance().get('region');
 
 export class BoatManager {
@@ -110,7 +111,9 @@ export class BoatManager {
     }
     // Mark the boat as checked out
     existingBoat.isAvailable = false;
-    existingBoat.checkedOutTo = user.firstName + " " + user.lastName; // Assuming checkedOutTo is set in the Boat object
+    existingBoat.checkedOutTo = user;
+    existingBoat.checkOutReason = reason;
+    existingBoat.checkedOutToName = user.firstName + " " + user.lastName; // Assuming checkedOutTo is set in the Boat object
     existingBoat.checkedOutAt = new Date().getTime(); // Set the current date as checked out time
     existingBoat.checkedInAt = null; // Reset checked-in time 
     // Save the updated boat back to DynamoDB
