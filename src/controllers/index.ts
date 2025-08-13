@@ -7,15 +7,7 @@ import { Boat } from "../model/Boat";
 import { LogEntry } from '../model/log';
 
 // Extend the SessionData interface to include pageBody
-declare module 'express-session' {
-    interface SessionData {
-        pageBody?: string;
-        checkIn?: boolean;
-        theBoatId?: string;
-        userName?: string;
-        logEntry?: LogEntry; // Adjust the type as needed
-    }
-}
+
 
 
 export class IndexController {

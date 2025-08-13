@@ -5,10 +5,21 @@ import multer from 'multer';
 import { Person } from "../model/Person";
 import { RSA_PRIVATE_KEY } from "../api/server";
 import jwt from 'jsonwebtoken';
+import { LogEntry } from "../model/log";
 
 // Extend Express Request type to include file property
 interface MulterRequest extends Request {
     file?: Express.Multer.File;
+}
+
+declare module 'express-session' {
+    interface SessionData {
+        pageBody?: string;
+        checkIn?: boolean;
+        theBoatId?: string;
+        userName?: string;
+        logEntry?: LogEntry; // Adjust the type as needed
+    }
 }
 
 export class AdminController {

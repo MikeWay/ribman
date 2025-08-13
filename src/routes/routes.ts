@@ -1,10 +1,10 @@
 import { Router  } from 'express';
-import { IndexController } from '../controllers';
-import { NavigationController } from '../controllers/NavigationController';
-import { adminController } from '../controllers/AdminController';
+//import { IndexController } from '../controllers';
+
+import { adminController } from '../controllers/adminController';
 import multer from 'multer';
 import { apiServer } from '../api/server';
-import { expressjwt, Request } from 'express-jwt';
+import { Request } from 'express-jwt';
 
 import fs from 'fs';
 import path from 'path';
@@ -20,11 +20,10 @@ const RSA_PUBLIC_KEY = fs.readFileSync(absolutePath, 'utf8');
 
 const router = Router();
 
-const navigationController = new NavigationController()
 
 export function setRoutes(app: any) {
     app.use('/', router);
-    router.post('/navigate', navigationController.navigate.bind(navigationController));
+    //router.post('/navigate', navigationController.navigate.bind(navigationController));
     router.get('/report', adminController.genLogReports.bind(adminController));
     router.get('/admin', checkIfAdminAuthenticated, adminController.getHome.bind(adminController));
     router.post('/checkInAll', checkIfAdminAuthenticated, adminController.checkInAllBoats.bind(adminController));
