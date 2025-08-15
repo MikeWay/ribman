@@ -139,7 +139,8 @@
         </head>
         <body class="vscode-body vscode-light">
             <h1 id="nodejs-server-project">Node.js Server Project</h1>
-<p>This project is a simple Node.js server built using TypeScript. It serves as a template for creating RESTful APIs and demonstrates the structure of a typical Node.js application.</p>
+<p>Server component of the boat manager application.
+Provides a set of API's to interface with DynamoDB tables holding the data</p>
 <h2 id="project-structure">Project Structure</h2>
 <pre><code>nodejs-server
 ├── src
@@ -147,7 +148,7 @@
 │   ├── controllers        # Contains controller classes
 │   │   └── index.ts      # Exports IndexController
 │   ├── routes             # Contains route definitions
-│   │   └── index.ts      # Exports setRoutes function
+│   │   └── routes.ts      # Exports setRoutes function
 │   └── types              # Contains type definitions
 │       └── index.ts      # Exports Request and Response interfaces
 ├── package.json           # NPM configuration file
@@ -180,14 +181,169 @@
 </ol>
 <h2 id="usage">Usage</h2>
 <p>Once the server is running, you can access the following routes:</p>
-<ul>
-<li><strong>GET /</strong> - Returns the home page.</li>
-<li><strong>GET /about</strong> - Returns information about the application.</li>
-</ul>
+<p>/api/* routes are the web service interfaces
+/admin/* routes are for the admin we interface</p>
 <h2 id="contributing">Contributing</h2>
 <p>Feel free to submit issues or pull requests for any improvements or features you would like to see in this project.</p>
 <h2 id="run-on-server">Run on server</h2>
 <p>use forever bin/server.js from the app root dir</p>
+<h2 id="routes">Routes</h2>
+<p>/**</p>
+<ul>
+<li>Sets up all application routes for the Express app.</li>
+<li></li>
+<li>
+<h2 id="routes-1">Routes</h2>
+</li>
+<li></li>
+<li>
+<ul>
+<li><code>GET /report</code></li>
+</ul>
+</li>
+<li>Generates log reports.</li>
+<li>Controller: <code>adminController.genLogReports</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>GET /admin</code></li>
+</ul>
+</li>
+<li>Admin home page. Requires admin authentication.</li>
+<li>Controller: <code>adminController.getHome</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>POST /checkInAll</code></li>
+</ul>
+</li>
+<li>Checks in all boats. Requires admin authentication.</li>
+<li>Controller: <code>adminController.checkInAllBoats</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>GET /admin/listUsers</code></li>
+</ul>
+</li>
+<li>Lists all users. Requires admin authentication.</li>
+<li>Controller: <code>adminController.listUsers</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>GET /admin/set-password</code></li>
+</ul>
+</li>
+<li>Displays input for admin password. Requires admin authentication.</li>
+<li>Controller: <code>adminController.inputAdminPassword</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>POST /admin/set-password</code></li>
+</ul>
+</li>
+<li>Sets admin password. Requires admin authentication.</li>
+<li>Controller: <code>adminController.setAdminPassword</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>GET /admin/loadUsers</code></li>
+</ul>
+</li>
+<li>Loads new users. Requires admin authentication.</li>
+<li>Controller: <code>adminController.loadNewUsers</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>GET /admin/deleteAllUsers</code></li>
+</ul>
+</li>
+<li>Deletes all users. Requires admin authentication.</li>
+<li>Controller: <code>adminController.deleteAllUsers</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>POST /admin/upload-users</code></li>
+</ul>
+</li>
+<li>Uploads users from a CSV file. Requires admin authentication.</li>
+<li>Middleware: <code>upload.single('csvFile')</code></li>
+<li>Controller: <code>adminController.uploadUsers</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>POST /api/check-person</code></li>
+</ul>
+</li>
+<li>Checks a person's details. Requires authentication.</li>
+<li>Controller: <code>apiServer.checkPerson</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>POST /api/check-out-boat</code></li>
+</ul>
+</li>
+<li>Checks out a boat. Requires authentication.</li>
+<li>Controller: <code>apiServer.checkOutBoat</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>POST /api/check-in-boat</code></li>
+</ul>
+</li>
+<li>Checks in a boat. Requires authentication.</li>
+<li>Controller: <code>apiServer.checkInBoat</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>GET /api/available-boats</code></li>
+</ul>
+</li>
+<li>Gets available boats. Requires authentication.</li>
+<li>Controller: <code>apiServer.getAvailableBoats</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>GET /api/checked-out-boats</code></li>
+</ul>
+</li>
+<li>Gets checked out boats. Requires authentication.</li>
+<li>Controller: <code>apiServer.getCheckedOutBoats</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>GET /api/defects-list</code></li>
+</ul>
+</li>
+<li>Gets possible defects list. Requires authentication.</li>
+<li>Controller: <code>apiServer.getPossibleDefectsList</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>POST /api/login</code></li>
+</ul>
+</li>
+<li>API login endpoint.</li>
+<li>Controller: <code>apiServer.login</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>GET /admin-login</code></li>
+</ul>
+</li>
+<li>Admin login page.</li>
+<li>Controller: <code>adminController.adminLogin</code></li>
+<li></li>
+<li>
+<ul>
+<li><code>POST /admin/login</code></li>
+</ul>
+</li>
+<li>Admin login action.</li>
+<li>Controller: <code>adminController.login</code></li>
+<li></li>
+<li>@param app Express application instance
+*/</li>
+</ul>
 
             
             

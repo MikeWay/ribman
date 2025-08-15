@@ -14,25 +14,8 @@ const REGION = Config.getInstance().get('region');
 
 
 export class PersonManager {
-    getAllPersons() {
-        throw new Error("Method not implemented.");
-    }
-    getAdminByEmailAndPassword(email: string, password: string): Person {
-        console.log('Need real validation of email and password');
-        // TODO - implement real validation of email and password
-        // For now, return a dummy admin person if the email and password match
-        if(email === 'dogsbody@exe-sailing-club.org' && password === 'password123') {
-            return new Person('666', 'Dogs', 'Body', 1, 1, 1970);
-        }
-        throw new Error('Invalid email or password');
-    }
 
     private client = new DynamoDBClient({ region: REGION });
-
-    public setClient(client: DynamoDBClient): void {
-        this.client = client;
-        this.ddbDocClient = DynamoDBDocumentClient.from(this.client);
-    }
 
     private ddbDocClient = DynamoDBDocumentClient.from(this.client);
 
@@ -143,7 +126,9 @@ export class PersonManager {
             const response = await this.ddbDocClient.send(command);
             if (response.Items && response.Items.length > 0) {
                 for (const item of response.Items) {
-                    const person = Person.fromItem(unmarshall(item) as Person);
+                    const unmarshalled = unmarshall(item);
+                    console.log('Unmarshalled item (getPersonByLastNameAndBirthDate):', unmarshalled);
+                    const person = Person.fromItem(unmarshalled as Person);
                     if (
                         person.lastName.toLowerCase().startsWith(firstLetterLC) &&
                         person.birthDay === birthDay &&

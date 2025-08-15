@@ -1,0 +1,228 @@
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mtests-jest/api/[22m[1mserver.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mtests-jest/[22m[1mPersonManager.spec.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mtests-jest/controllers/[22m[1madminController.spec.ts[22m
+  [1m● [22mConsole
+
+    [2mconsole.log[22m
+      DefectManager example running...
+[2m[22m
+[2m      [2mat [22m[2msrc/model/DefectManager.ts[2m:54:17[22m[2m[22m
+
+    [2mconsole.log[22m
+      Current directory: /home/mjrw/workNode/RibMan/nodejs-server/src/api
+[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2msrc/api/server.ts[2m:10:9)[22m[2m[22m
+
+    [2mconsole.log[22m
+      Absolute path to private key: /home/mjrw/workNode/RibMan/nodejs-server/src/keys/private.key
+[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2msrc/api/server.ts[2m:16:9)[22m[2m[22m
+
+    [2mconsole.log[22m
+      Server initialized
+[2m[22m
+[2m      [2mat ApiServer.init ([22m[2msrc/api/server.ts[2m:25:13)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      Error deleting all users: Error: fail[39m
+[31m          at /home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:61:80[39m
+[31m          at Generator.next (<anonymous>)[39m
+[31m          at /home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:8:71[39m
+[31m          at new Promise (<anonymous>)[39m
+[31m          at __awaiter (/home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:4:12)[39m
+[31m          at Object.<anonymous> (/home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:60:66)[39m
+[31m          at Promise.finally.completed (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)[39m
+[31m          at new Promise (<anonymous>)[39m
+[31m          at callAsyncCircusFn (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)[39m
+[31m          at _callCircusTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)[39m
+[31m          at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+[31m          at _runTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:949:3)[39m
+[31m          at _runTestsForDescribeBlock (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:839:13)[39m
+[31m          at _runTestsForDescribeBlock (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:829:11)[39m
+[31m          at run (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:757:3)[39m
+[31m          at runAndTransformResultsToJestFormat (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1921:21)[39m
+[31m          at jestAdapter (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/runner.js:101:19)[39m
+[31m          at runTestInternal (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:272:16)[39m
+[31m          at runTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:340:7)[39m
+[31m          at Object.worker (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:494:12)[39m
+[2m[22m
+[2m    [0m [90m 47 |[39m             res[33m.[39mstatus([35m200[39m)[33m.[39mjson({ message[33m:[39m [32m'All users deleted successfully.'[39m })[33m;[39m[22m
+[2m     [90m 48 |[39m         } [36mcatch[39m (error) {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 49 |[39m             console[33m.[39merror([32m'Error deleting all users:'[39m[33m,[39m error)[33m;[39m[22m
+[2m     [90m    |[39m                     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 50 |[39m             res[33m.[39mstatus([35m500[39m)[33m.[39mjson({ error[33m:[39m [32m'Failed to delete all users'[39m })[33m;[39m[22m
+[2m     [90m 51 |[39m         }[22m
+[2m     [90m 52 |[39m     }[0m[22m
+[2m[22m
+[2m      [2mat AdminController.<anonymous> ([22m[2msrc/controllers/adminController.ts[2m:49:21)[22m[2m[22m
+[2m          at Generator.throw (<anonymous>)[22m
+[2m      [2mat rejected ([22m[2msrc/controllers/adminController.ts[2m:6:65)[22m[2m[22m
+
+    [2mconsole.log[22m
+      CSV log report sent successfully.
+[2m[22m
+[2m      [2mat AdminController.<anonymous> ([22m[2msrc/controllers/adminController.ts[2m:87:21)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      Error fetching users: Error: fail[39m
+[31m          at /home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:131:69[39m
+[31m          at Generator.next (<anonymous>)[39m
+[31m          at /home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:8:71[39m
+[31m          at new Promise (<anonymous>)[39m
+[31m          at __awaiter (/home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:4:12)[39m
+[31m          at Object.<anonymous> (/home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:130:55)[39m
+[31m          at Promise.finally.completed (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)[39m
+[31m          at new Promise (<anonymous>)[39m
+[31m          at callAsyncCircusFn (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)[39m
+[31m          at _callCircusTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)[39m
+[31m          at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+[31m          at _runTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:949:3)[39m
+[31m          at _runTestsForDescribeBlock (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:839:13)[39m
+[31m          at _runTestsForDescribeBlock (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:829:11)[39m
+[31m          at run (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:757:3)[39m
+[31m          at runAndTransformResultsToJestFormat (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1921:21)[39m
+[31m          at jestAdapter (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/runner.js:101:19)[39m
+[31m          at runTestInternal (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:272:16)[39m
+[31m          at runTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:340:7)[39m
+[31m          at Object.worker (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:494:12)[39m
+[2m[22m
+[2m    [0m [90m  98 |[39m             res[33m.[39mlocals[33m.[39musers [33m=[39m [36mawait[39m dao[33m.[39madminPersonManager[33m.[39mgetAllPersons()[33m;[39m[22m
+[2m     [90m  99 |[39m         } [36mcatch[39m (error) {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 100 |[39m             console[33m.[39merror([32m'Error fetching users:'[39m[33m,[39m error)[33m;[39m[22m
+[2m     [90m     |[39m                     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 101 |[39m             res[33m.[39mlocals[33m.[39merror [33m=[39m [32m'Failed to fetch users'[39m[33m;[39m[22m
+[2m     [90m 102 |[39m         }[22m
+[2m     [90m 103 |[39m         [90m// Set the page body in the session[39m[0m[22m
+[2m[22m
+[2m      [2mat AdminController.<anonymous> ([22m[2msrc/controllers/adminController.ts[2m:100:21)[22m[2m[22m
+[2m          at Generator.throw (<anonymous>)[22m
+[2m      [2mat rejected ([22m[2msrc/controllers/adminController.ts[2m:6:65)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      Error during admin login: Error: fail[39m
+[31m          at /home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:175:71[39m
+[31m          at Generator.next (<anonymous>)[39m
+[31m          at /home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:8:71[39m
+[31m          at new Promise (<anonymous>)[39m
+[31m          at __awaiter (/home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:4:12)[39m
+[31m          at Object.<anonymous> (/home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:173:61)[39m
+[31m          at Promise.finally.completed (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)[39m
+[31m          at new Promise (<anonymous>)[39m
+[31m          at callAsyncCircusFn (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)[39m
+[31m          at _callCircusTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)[39m
+[31m          at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+[31m          at _runTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:949:3)[39m
+[31m          at _runTestsForDescribeBlock (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:839:13)[39m
+[31m          at _runTestsForDescribeBlock (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:829:11)[39m
+[31m          at run (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:757:3)[39m
+[31m          at runAndTransformResultsToJestFormat (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1921:21)[39m
+[31m          at jestAdapter (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/runner.js:101:19)[39m
+[31m          at runTestInternal (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:272:16)[39m
+[31m          at runTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:340:7)[39m
+[31m          at Object.worker (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:494:12)[39m
+[2m[22m
+[2m    [0m [90m 124 |[39m             }[22m
+[2m     [90m 125 |[39m         } [36mcatch[39m (error) {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 126 |[39m             console[33m.[39merror([32m'Error during admin login:'[39m[33m,[39m error)[33m;[39m[22m
+[2m     [90m     |[39m                     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 127 |[39m             res[33m.[39mrender([32m'error'[39m[33m,[39m { error[33m:[39m [32m'Invalid email or password'[39m })[33m;[39m[22m
+[2m     [90m 128 |[39m         }[22m
+[2m     [90m 129 |[39m     }[0m[22m
+[2m[22m
+[2m      [2mat AdminController.<anonymous> ([22m[2msrc/controllers/adminController.ts[2m:126:21)[22m[2m[22m
+[2m          at Generator.throw (<anonymous>)[22m
+[2m      [2mat rejected ([22m[2msrc/controllers/adminController.ts[2m:6:65)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      Error updating password: Error: fail[39m
+[31m          at /home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:215:71[39m
+[31m          at Generator.next (<anonymous>)[39m
+[31m          at /home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:8:71[39m
+[31m          at new Promise (<anonymous>)[39m
+[31m          at __awaiter (/home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:4:12)[39m
+[31m          at Object.<anonymous> (/home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:213:62)[39m
+[31m          at Promise.finally.completed (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)[39m
+[31m          at new Promise (<anonymous>)[39m
+[31m          at callAsyncCircusFn (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)[39m
+[31m          at _callCircusTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)[39m
+[31m          at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+[31m          at _runTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:949:3)[39m
+[31m          at _runTestsForDescribeBlock (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:839:13)[39m
+[31m          at _runTestsForDescribeBlock (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:829:11)[39m
+[31m          at run (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:757:3)[39m
+[31m          at runAndTransformResultsToJestFormat (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1921:21)[39m
+[31m          at jestAdapter (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/runner.js:101:19)[39m
+[31m          at runTestInternal (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:272:16)[39m
+[31m          at runTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:340:7)[39m
+[31m          at Object.worker (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:494:12)[39m
+[2m[22m
+[2m    [0m [90m 158 |[39m             }[22m
+[2m     [90m 159 |[39m         } [36mcatch[39m (error) {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 160 |[39m             console[33m.[39merror([32m'Error updating password:'[39m[33m,[39m error)[33m;[39m[22m
+[2m     [90m     |[39m                     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 161 |[39m             res[33m.[39mstatus([35m500[39m)[33m.[39mjson({ error[33m:[39m [32m'Internal server error'[39m })[33m;[39m[22m
+[2m     [90m 162 |[39m         }[22m
+[2m     [90m 163 |[39m     }[0m[22m
+[2m[22m
+[2m      [2mat AdminController.<anonymous> ([22m[2msrc/controllers/adminController.ts[2m:160:21)[22m[2m[22m
+[2m          at Generator.throw (<anonymous>)[22m
+[2m      [2mat rejected ([22m[2msrc/controllers/adminController.ts[2m:6:65)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      Error uploading users: Error: fail[39m
+[31m          at /home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:238:61[39m
+[31m          at Generator.next (<anonymous>)[39m
+[31m          at /home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:8:71[39m
+[31m          at new Promise (<anonymous>)[39m
+[31m          at __awaiter (/home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:4:12)[39m
+[31m          at Object.<anonymous> (/home/mjrw/workNode/RibMan/nodejs-server/tests-jest/controllers/adminController.spec.ts:236:57)[39m
+[31m          at Promise.finally.completed (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)[39m
+[31m          at new Promise (<anonymous>)[39m
+[31m          at callAsyncCircusFn (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)[39m
+[31m          at _callCircusTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)[39m
+[31m          at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+[31m          at _runTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:949:3)[39m
+[31m          at _runTestsForDescribeBlock (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:839:13)[39m
+[31m          at _runTestsForDescribeBlock (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:829:11)[39m
+[31m          at run (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:757:3)[39m
+[31m          at runAndTransformResultsToJestFormat (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/jestAdapterInit.js:1921:21)[39m
+[31m          at jestAdapter (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-circus/build/runner.js:101:19)[39m
+[31m          at runTestInternal (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:272:16)[39m
+[31m          at runTest (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:340:7)[39m
+[31m          at Object.worker (/home/mjrw/workNode/RibMan/nodejs-server/node_modules/jest-runner/build/testWorker.js:494:12)[39m
+[2m[22m
+[2m    [0m [90m 193 |[39m[22m
+[2m     [90m 194 |[39m         } [36mcatch[39m (error) {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 195 |[39m             console[33m.[39merror([32m'Error uploading users:'[39m[33m,[39m error)[33m;[39m[22m
+[2m     [90m     |[39m                     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 196 |[39m             res[33m.[39mstatus([35m500[39m)[33m.[39mjson({ error[33m:[39m [32m'Failed to upload users'[39m })[33m;[39m[22m
+[2m     [90m 197 |[39m         }[22m
+[2m     [90m 198 |[39m     }[0m[22m
+[2m[22m
+[2m      [2mat AdminController.<anonymous> ([22m[2msrc/controllers/adminController.ts[2m:195:21)[22m[2m[22m
+[2m          at Generator.throw (<anonymous>)[22m
+[2m      [2mat rejected ([22m[2msrc/controllers/adminController.ts[2m:6:65)[22m[2m[22m
+
+
+ReferenceError: You are trying to `import` a file after the Jest environment has been torn down. From tests-jest/controllers/adminController.spec.ts.
+
+      [2mat [22mnode_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-node/dist-cjs/index.js[2m:111:70[22m
+      [2mat [22mnode_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-node/dist-cjs/index.js[2m:111:27[22m
+      [2mat [22mnode_modules/@smithy/property-provider/dist-cjs/index.js[2m:99:27[22m
+      [2mat coalesceProvider ([22mnode_modules/@smithy/property-provider/dist-cjs/index.js[2m:126:18)[22m
+      [2mat [22mnode_modules/@smithy/property-provider/dist-cjs/index.js[2m:144:18[22m
+      [2mat [22mnode_modules/@smithy/core/dist-cjs/index.js[2m:111:17[22m
+      [2mat [22mnode_modules/@aws-sdk/middleware-logger/dist-cjs/index.js[2m:33:22[22m
+/home/mjrw/workNode/RibMan/nodejs-server/node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-node/dist-cjs/index.js:112
+      return fromIni(init)();
+             ^
+
+[TypeError: fromIni is not a function]
+
+Node.js v22.17.1
+
+[1mTest Suites: [22m[1m[32m3 passed[39m[22m, 3 total
+[1mTests:       [22m[1m[32m19 passed[39m[22m, 19 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        1.494 s, estimated 2 s
+[2mRan all test suites[22m[2m related to changed files[22m[2m.[22m

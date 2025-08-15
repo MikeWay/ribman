@@ -26,6 +26,10 @@ describe('PersonManager', () => {
     mockSend.mockClear();
   });
 
+  it('is a mock test', () => {
+    expect(true).toBe(true);
+  });
+
   it('should save a person to DynamoDB', async () => {
     const person: Person = {
       id: '1',
@@ -169,8 +173,8 @@ describe('PersonManager.deleteAllPersons', () => {
 
     it('should delete all persons from the database', async () => {
         const mockItems = [
-            { id: { S: '1' }, firstName: { S: 'Alice' }, lastName: { S: 'Smith' } },
-            { id: { S: '2' }, firstName: { S: 'Bob' }, lastName: { S: 'Jones' } },
+            { id: { S: '1' }, firstName: { S: 'Alice' }, lastName: { S: 'Smith' }, search_key: { S: 'a-15-6' } },
+            { id: { S: '2' }, firstName: { S: 'Bob' }, lastName: { S: 'Jones' }, search_key: { S: 'b-15-6' } },
         ];
         mockSend.mockResolvedValueOnce({ Items: mockItems });
 
@@ -192,6 +196,136 @@ describe('PersonManager.deleteAllPersons', () => {
         await expect(personManager.deleteAllPersons()).rejects.toThrow('DynamoDB error');
         expect(mockSend).toHaveBeenCalledTimes(1);
     });
+    describe('PersonManager.getPersonByLastNameAndBirthDate', () => {
+        let personManager: PersonManager;
+        let mockSend: jest.Mock;
 
+        beforeEach(() => {
+            personManager = new PersonManager();
+            // @ts-ignore
+            mockSend = personManager['ddbDocClient'].send as jest.Mock;
+            mockSend.mockClear();
+        });
 
+        it('should return matching persons when items are found', async () => {
+            const mockItems = [
+                {
+                    id: { S: '10' },
+                    firstName: { S: 'Sam' },
+                    lastName: { S: 'Smith' },
+                    birthDay: { N: '15' },
+                    birthMonth: { N: '6' },
+                    birthYear: { N: '1990' },
+                    search_key: { S: 's-15-6' }
+                },
+                {
+                    id: { S: '11' },
+                    firstName: { S: 'Sara' },
+                    lastName: { S: 'Smith' },
+                    birthDay: { N: '15' },
+                    birthMonth: { N: '6' },
+                    birthYear: { N: '1990' },
+                    search_key: { S: 's-15-6' }
+                }
+            ];
+            mockSend.mockResolvedValueOnce({ Items: mockItems });
+
+            const fromItemSpy = jest.spyOn(Person, 'fromItem').mockImplementation((item: any) => ({
+                id: item.id,
+                firstName: item.firstName,
+                lastName: item.lastName,
+                birthDay: Number(item.birthDay),
+                birthMonth: Number(item.birthMonth),
+                birthYear: Number(item.birthYear),
+                searchKey: item.search_key
+            }) as Person);
+
+            const result = await personManager.getPersonByLastNameAndBirthDate('S', 15, 6, 1990);
+
+            expect(mockSend).toHaveBeenCalled();
+            expect(fromItemSpy).toHaveBeenCalledTimes(2);
+            expect(result).toEqual([
+                {
+                    id: '10',
+                    firstName: 'Sam',
+                    lastName: 'Smith',
+                    birthDay: 15,
+                    birthMonth: 6,
+                    birthYear: 1990,
+                    searchKey: 's-15-6'
+                },
+                {
+                    id: '11',
+                    firstName: 'Sara',
+                    lastName: 'Smith',
+                    birthDay: 15,
+                    birthMonth: 6,
+                    birthYear: 1990,
+                    searchKey: 's-15-6'
+                }
+            ]);
+            fromItemSpy.mockRestore();
+        });
+
+        it('should filter persons by first letter, birthDay, birthMonth, and birthYear', async () => {
+            const mockItems = [
+                {
+                    id: { S: '12' },
+                    firstName: { S: 'Steve' },
+                    lastName: { S: 'Stevenson' },
+                    birthDay: { N: '20' },
+                    birthMonth: { N: '7' },
+                    birthYear: { N: '1985' },
+                    search_key: { S: 's-20-7' }
+                },
+                {
+                    id: { S: '13' },
+                    firstName: { S: 'Sally' },
+                    lastName: { S: 'Smith' },
+                    birthDay: { N: '20' },
+                    birthMonth: { N: '7' },
+                    birthYear: { N: '1985' },
+                    search_key: { S: 's-20-7' }
+                }
+            ];
+            mockSend.mockResolvedValueOnce({ Items: mockItems });
+
+            const fromItemSpy = jest.spyOn(Person, 'fromItem').mockImplementation((item: any) => ({
+                id: item.id,
+                firstName: item.firstName,
+                lastName: item.lastName,
+                birthDay: Number(item.birthDay),
+                birthMonth: Number(item.birthMonth),
+                birthYear: Number(item.birthYear),
+                searchKey: item.search_key
+            }) as Person);
+
+            const result = await personManager.getPersonByLastNameAndBirthDate('S', 20, 7, 1985);
+
+            expect(result.length).toBe(2);
+            expect(result[0].lastName.toLowerCase().startsWith('s')).toBe(true);
+            expect(result[0].birthDay).toBe(20);
+            expect(result[0].birthMonth).toBe(7);
+            expect(result[0].birthYear).toBe(1985);
+            fromItemSpy.mockRestore();
+        });
+
+        it('should return an empty array if no items match', async () => {
+            mockSend.mockResolvedValueOnce({ Items: [] });
+
+            const result = await personManager.getPersonByLastNameAndBirthDate('X', 1, 1, 2000);
+
+            expect(mockSend).toHaveBeenCalled();
+            expect(result).toEqual([]);
+        });
+
+        it('should throw error if parameters are invalid', async () => {
+            await expect(personManager.getPersonByLastNameAndBirthDate('', 0, 0, 0)).rejects.toThrow('Invalid parameters');
+        });
+
+        it('should throw error if DynamoDB send fails', async () => {
+            mockSend.mockRejectedValueOnce(new Error('DynamoDB error'));
+            await expect(personManager.getPersonByLastNameAndBirthDate('S', 15, 6, 1990)).rejects.toThrow('DynamoDB error');
+        });
+    });
 });

@@ -1,7 +1,6 @@
 import { dao } from "../model/dao";
 import { logManager } from "../model/LogManager";
 import { Request, Response } from 'express';
-import multer from 'multer';
 import { Person } from "../model/Person";
 import { RSA_PRIVATE_KEY } from "../api/server";
 import jwt from 'jsonwebtoken';
@@ -41,15 +40,14 @@ export class AdminController {
         res.status(200).json({ message: 'All boats checked in.' });
     }
 
-    deleteAllUsers(req: Request, res: Response): void {
-        dao.personManager.deleteAllPersons()
-            .then(() => {
-                res.status(200).json({ message: 'All users deleted successfully.' });
-            })
-            .catch((error) => {
-                console.error('Error deleting all users:', error);
-                res.status(500).json({ error: 'Failed to delete all users' });
-            });
+    async deleteAllUsers(req: Request, res: Response): Promise<void> {
+        try {
+            await dao.personManager.deleteAllPersons();
+            res.status(200).json({ message: 'All users deleted successfully.' });
+        } catch (error) {
+            console.error('Error deleting all users:', error);
+            res.status(500).json({ error: 'Failed to delete all users' });
+        }
     }
 
     public getHome(req: Request, res: Response): void {
@@ -62,36 +60,31 @@ export class AdminController {
     public async genLogReports(req: Request, res: Response): Promise<void> {
         try {
             // Your logic here
-            logManager.listLogEntries()
-                .then((logs) => {
-                    const csvRows = [];
-                    const headers = ["action", "boatName", "personName", "checkOutDateTime", "checkInDateTime", "checkOutReason", "defect", "additionalInfo"];
-                    csvRows.push(headers.join(','));
-                    for (const log of logs) {
-                        const formattedCheckOutDateTime = log.checkOutDateTime ? new Date(log.checkOutDateTime).toISOString() : '';
-                        const formattedCheckInDateTime = log.checkInDateTime ? new Date(log.checkInDateTime).toISOString() : '';
-                        const row = headers.map(h => {
-                            if (h === 'checkOutDateTime') {
-                                return `"${formattedCheckOutDateTime.replace(/"/g, '""')}"`;
-                            }
-                            if (h === 'checkInDateTime') {
-                                return `"${formattedCheckInDateTime.replace(/"/g, '""')}"`;
-                            }
-                            return `"${(log[h] ?? '').toString().replace(/"/g, '""')}"`;
-                        });
-                        csvRows.push(row.join(','));
+            const logs = await logManager.listLogEntries();
+            const csvRows = [];
+            const headers = ["action", "boatName", "personName", "checkOutDateTime", "checkInDateTime", "checkOutReason", "defect", "additionalInfo"];
+            csvRows.push(headers.join(','));
+            for (const log of logs) {
+                const formattedCheckOutDateTime = log.checkOutDateTime ? new Date(log.checkOutDateTime).toISOString() : '';
+                const formattedCheckInDateTime = log.checkInDateTime ? new Date(log.checkInDateTime).toISOString() : '';
+                const row = headers.map(h => {
+                    if (h === 'checkOutDateTime') {
+                        return `"${formattedCheckOutDateTime.replace(/"/g, '""')}"`;
                     }
-                    res.setHeader('Content-Type', 'text/csv');
-                    res.status(200)
-                        .setHeader('Content-Disposition', 'attachment; filename="log_report.csv"')
-                        .send(csvRows.join('\n'));
-                    res.end();
-                    console.log('CSV log report sent successfully.');
-                })
-                .catch((error) => {
-                    console.error('Error fetching logs:', error);
-                    res.status(500).json({ error: 'Failed to fetch logs' });
-                })
+                    if (h === 'checkInDateTime') {
+                        return `"${formattedCheckInDateTime.replace(/"/g, '""')}"`;
+                    }
+                    return `"${(log[h] ?? '').toString().replace(/"/g, '""')}"`;
+                });
+                csvRows.push(row.join(','));
+            }
+            res.setHeader('Content-Type', 'text/csv');
+            res.status(200)
+                .setHeader('Content-Disposition', 'attachment; filename="log_report.csv"')
+                .send(csvRows.join('\n'));
+            res.end();
+            console.log('CSV log report sent successfully.');
+
         } catch (error) {
             res.status(500).json({ error: 'Internal server error' });
         }
@@ -141,11 +134,11 @@ export class AdminController {
         res.render('index', { title: 'Load Users' });
     }
     public async inputAdminPassword(req: Request, res: Response): Promise<void> {
-        
+
         const { email_address } = req.query as { email_address: string };
         const admin = await dao.adminPersonManager.getAdminByEmail(email_address);
         // Set the page body in the session
-        req.session.pageBody = res.locals.pageBody;        
+        req.session.pageBody = res.locals.pageBody;
         //res.render('adminSetPassword', { title: 'Set Admin Password', email_address });
         res.render('adminSetPassword', { title: 'Set Admin Password', email_address, user: admin, error: null });
     }
