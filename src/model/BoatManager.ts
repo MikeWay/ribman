@@ -36,15 +36,6 @@ export class BoatManager {
   private client = new DynamoDBClient({ region: REGION });
   private ddbDocClient = DynamoDBDocumentClient.from(this.client);
 
-  private async saveAllBoats(boats: Boat[]): Promise<void> {
-    for (const boat of boats) {
-      try {
-        await this.saveBoat(boat);
-      } catch (err) {
-        console.error(`Error saving boat with ID ${boat.id}:`, err);
-      }
-    }
-  }
 
   async saveBoat(boat: Boat): Promise<void> {
     if (!boat || typeof boat.toItem !== 'function') {
@@ -121,9 +112,9 @@ export class BoatManager {
     await this.saveBoat(existingBoat);
     const boat = await this.getBoatByName(theBoat.name);
     if (boat && boat.isAvailable) {
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 
   async getBoatByName(name: string): Promise<Boat | undefined> {

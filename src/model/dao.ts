@@ -20,7 +20,7 @@ export class DataAccessObject {
         // Initialize the boat manager and person manager
         this.boatManager = new BoatManager();
         this.personManager = new PersonManager();
-        this.logManager = logManager;
+        this.logManager = new LogManager();
         this.defectManager = new DefectManager();
         this.adminPersonManager = new AdminPersonManager();
         //this.initialize();

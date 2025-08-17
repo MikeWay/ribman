@@ -39,6 +39,7 @@ export class AdminPerson {
         const [salt, key] = this.passwordHash.split(':');
         const derivedKey = await new Promise<string>((resolve, reject) => {
             crypto.scrypt(password, salt, 64, (err, derivedKey) => {
+                console.log('derivedKey ===>', derivedKey.toString('hex'));
                 if (err) reject(err);
                 else resolve(derivedKey.toString('hex'));
             });

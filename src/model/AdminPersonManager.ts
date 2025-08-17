@@ -15,13 +15,7 @@ const REGION = Config.getInstance().get('region');
 
 export class AdminPersonManager {
 
-
     private client = new DynamoDBClient({ region: REGION });
-
-    public setClient(client: DynamoDBClient): void {
-        this.client = client;
-        this.ddbDocClient = DynamoDBDocumentClient.from(this.client);
-    }
 
     private ddbDocClient = DynamoDBDocumentClient.from(this.client);
 
