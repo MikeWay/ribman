@@ -4,6 +4,7 @@ import { AdminController } from '../../src/controllers/adminController';
 import { dao } from '../../src/model/dao';
 import { logManager } from '../../src/model/LogManager';
 import jwt from 'jsonwebtoken';
+import { AdminPerson } from '../../src/model/AdminPerson';
 
 
 describe('AdminController', () => {
@@ -39,24 +40,29 @@ describe('AdminController', () => {
 
     it('should render adminLogin page', () => {
         controller.adminLogin(req, res);
-        expect(res.render.calledWith('adminLogin', { title: 'Admin' })).toBe(true);
+        expect(res.locals.pageBody).toEqual('adminLogin');
         expect(req.session.pageBody).toEqual('adminLogin');
+        expect(res.render.calledWith('index', { title: 'Admin' })).toBe(true);        
     });
 
     it('should check in all boats', async () => {
         const stub = sinon.stub(dao.boatManager, 'checkInAllBoats').resolves();
         await controller.checkInAllBoats(req, res);
         expect(stub.calledOnce).toBe(true);
-        expect(res.status.calledWith(200)).toBe(true);
-        expect(res.json.calledWith({ message: 'All boats checked in.' })).toBe(true);
+        expect(res.locals.pageBody).toEqual('taskComplete');
+        expect(req.session.pageBody).toBe('taskComplete');
+        expect(res.locals.task).toEqual('Check in all Boats');        
+        expect(res.render.calledWith('index', { title: 'Admin' })).toBe(true);  
     });
+
+
 
     it('should delete all users', async () => {
         const stub = sinon.stub(dao.personManager, 'deleteAllPersons').resolves();
         await controller.deleteAllUsers(req, res);
-        expect(stub.calledOnce).toBe(true);
-        expect(res.status.calledWith(200)).toBe(true);
-        expect(res.json.calledWith({ message: 'All users deleted successfully.' })).toBe(true);
+        expect(res.locals.pageBody).toEqual('taskComplete');
+        expect(res.locals.task).toEqual('Delete All Users');
+        expect(res.render.calledWith('index', { title: 'Admin' })).toBe(true);
     });
 
     it('should handle error when deleting all users', async () => {
@@ -66,11 +72,13 @@ describe('AdminController', () => {
         expect(res.json.calledWithMatch({ error: 'Failed to delete all users' })).toBe(true);
     });
 
-    it('should render adminPage on getHome', () => {
+
+    it('should set pageBody and render index with title Admin', () => {
         controller.getHome(req, res);
-        expect(res.render.calledWith('adminPage', { title: 'Admin' })).toBe(true);
+        expect(res.locals.pageBody).toEqual('adminPage');
         expect(req.session.pageBody).toEqual('adminPage');
-    });
+        expect(res.render.calledWith('index', { title: 'Admin' })).toBe(true);
+    });    
 
     it('should generate log reports as CSV', async () => {
         const logs = [{
@@ -125,14 +133,14 @@ describe('AdminController', () => {
 
         sinon.stub(dao.adminPersonManager, 'getAllPersons').resolves([user]);
         await controller.listUsers(req, res);
-        expect(res.render.calledWith('adminListUsers', sinon.match.has('users', [user]))).toBe(true);
+        expect(res.render.calledWith('index', sinon.match.has('users', [user]))).toBe(true);
         expect(req.session.pageBody).toEqual('adminListUsers');
     });
 
     it('should handle error in listUsers', async () => {
         sinon.stub(dao.adminPersonManager, 'getAllPersons').rejects(new Error('fail'));
         await controller.listUsers(req, res);
-        expect(res.render.calledWith('adminListUsers', sinon.match.has('error', 'Failed to fetch users'))).toBe(true);
+        expect(res.render.calledWith('index', sinon.match.has('error', 'Failed to fetch users'))).toBe(true);
     });
 
     it('should login admin and set jwt cookie', async () => {
@@ -241,5 +249,129 @@ describe('AdminController', () => {
         await controller.uploadUsers(req, res);
         expect(res.status.calledWith(500)).toBe(true);
         expect(res.json.calledWithMatch({ error: 'Failed to upload users' })).toBe(true);
+    });
+    it('should render adminAddUser page and set session pageBody', () => {
+    controller.inputAddAdminUser(req, res);
+    expect(res.render.calledWith('adminAddUser', { title: 'Add Admin User' })).toBe(true);
+    expect(res.locals.pageBody).toEqual('adminAddUser');
+    expect(req.session.pageBody).toEqual('adminAddUser');
+});
+});
+describe('AdminController.saveNewAdminUser', () => {
+    let req: any;
+    let res: any;
+    let controller: AdminController;
+
+    beforeEach(() => {
+        controller = new AdminController();
+        req = {
+            body: {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john.doe@example.com',
+                password: 'password123'
+            },
+            session: {},
+        };
+        res = {
+            redirect: sinon.stub(),
+            render: sinon.stub(),
+        };
+    });
+
+    afterEach(() => {
+        sinon.restore();
+    });
+
+    it('should create a new admin user and redirect to listUsers', async () => {
+        const setPasswordStub = sinon.stub(AdminPerson.prototype, 'setPassword').resolves();
+        const saveAdminPersonStub = sinon.stub(dao.adminPersonManager, 'saveAdminPerson').resolves();
+
+        await controller.saveNewAdminUser(req, res);
+
+        expect(setPasswordStub.calledWith('password123')).toBe(true);
+        expect(saveAdminPersonStub.calledOnce).toBe(true);
+        expect(res.redirect.calledWith('/admin/listUsers')).toBe(true);
+    });
+
+    it('should render error if creating admin user fails', async () => {
+        sinon.stub(AdminPerson.prototype, 'setPassword').rejects(new Error('fail'));
+
+        await controller.saveNewAdminUser(req, res);
+
+        expect(res.render.calledWith('error', sinon.match.has('error', 'Failed to create admin user'))).toBe(true);
+    });
+
+    it('should render error if saving admin user fails', async () => {
+        sinon.stub(AdminPerson.prototype, 'setPassword').resolves();
+        sinon.stub(dao.adminPersonManager, 'saveAdminPerson').rejects(new Error('fail'));
+
+        await controller.saveNewAdminUser(req, res);
+
+        expect(res.render.calledWith('error', sinon.match.has('error', 'Failed to create admin user'))).toBe(true);
+    });
+});
+describe('AdminController.adminLogout', () => {
+    let req: any;
+    let res: any;
+    let controller: AdminController;
+
+    beforeEach(() => {
+        controller = new AdminController();
+        req = {
+            session: {
+                user: { email_address: 'admin@test.com' }
+            }
+        };
+        res = {
+            locals: {},
+            render: sinon.stub(),
+        };
+    });
+
+    afterEach(() => {
+        sinon.restore();
+    });
+
+    it('should delete token, set pageBody, and render adminLogin', () => {
+        const deleteStub = sinon.stub(dao.tokenStore, 'delete');
+        controller.adminLogout(req, res);
+        expect(deleteStub.calledWith('admin@test.com')).toBe(true);
+        expect(res.render.calledWith('index', { title: 'Admin' })).toBe(true);
+        expect(res.locals.pageBody).toEqual('adminLogin');
+        expect(req.session.pageBody).toEqual('adminLogin');
+    });
+
+    it('should handle missing user gracefully', () => {
+        req.session.user = undefined;
+        const deleteStub = sinon.stub(dao.tokenStore, 'delete');
+        controller.adminLogout(req, res);
+        expect(deleteStub.calledWith('')).toBe(true);
+        expect(res.render.calledWith('index', { title: 'Admin' })).toBe(true);
+        expect(res.locals.pageBody).toEqual('adminLogin');
+        expect(req.session.pageBody).toEqual('adminLogin');
+    });
+});
+describe('AdminController.getHome', () => {
+    let req: any;
+    let res: any;
+    let controller: AdminController;
+
+    beforeEach(() => {
+        controller = new AdminController();
+        req = {
+            session: {},
+        };
+        res = {
+            locals: {},
+            render: sinon.stub(),
+        };
+    });
+
+    it('should set pageBody and render index with title Admin', () => {
+        controller.getHome(req, res);
+        expect(res.locals.pageBody).toEqual('adminPage');
+        expect(req.session.pageBody).toEqual('adminPage');
+        expect(res.render.calledWith('index', { title: 'Admin' })).toBe(true);
     });
 });

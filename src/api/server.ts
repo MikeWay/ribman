@@ -13,7 +13,7 @@ import path from 'path';
 import { LogEntry } from "../model/log";
 import { DefectType } from "../model/defect";
 const absolutePath = path.resolve(__dirname, '../keys/private.key');
-console.log("Absolute path to private key:", absolutePath);
+//console.log("Absolute path to private key:", absolutePath);
 export const RSA_PRIVATE_KEY = fs.readFileSync(absolutePath, 'utf8');
 
 class ApiServer {
@@ -22,7 +22,7 @@ class ApiServer {
   }
 
   init() {
-    console.log("Server initialized");
+    console.log("API Server initialized");
   }
 
   start() {

@@ -5,6 +5,7 @@ import { Person } from "../model/Person";
 import { RSA_PRIVATE_KEY } from "../api/server";
 import jwt from 'jsonwebtoken';
 import { LogEntry } from "../model/log";
+import { AdminPerson } from "../model/AdminPerson";
 
 // Extend Express Request type to include file property
 interface MulterRequest extends Request {
@@ -18,10 +19,38 @@ declare module 'express-session' {
         theBoatId?: string;
         userName?: string;
         logEntry?: LogEntry; // Adjust the type as needed
+        user?: AdminPerson; // Add user property to session
     }
 }
 
+
+
 export class AdminController {
+
+    public inputAddAdminUser(req: Request, res: Response): any {
+        res.locals.pageBody = 'adminAddUser';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminAddUser view
+        res.render('adminAddUser', { title: 'Add Admin User' });
+    }
+
+    public async saveNewAdminUser(req: Request, res: Response): Promise<void> {
+        // Implement the logic to save a new admin user
+        const firstName = req.body.firstName;
+        const lastName = req.body.lastName;
+        const email = req.body.email;
+        const password = req.body.password;
+        try {
+
+            const newUser = new AdminPerson(email, firstName, lastName);
+            await newUser.setPassword(password); // setPassword hashes the password
+            await dao.adminPersonManager.saveAdminPerson(newUser);
+            res.redirect('/admin/listUsers');
+        } catch (error) {
+            console.error('Error creating admin user:', error);
+            res.render('error', { title: 'Add Admin User', error: 'Failed to create admin user' });
+        }
+    }
 
     constructor() {
         // Initialization code if needed
@@ -31,19 +60,46 @@ export class AdminController {
         res.locals.pageBody = 'adminLogin';
         req.session.pageBody = res.locals.pageBody;
         // render the adminLogin view
-        res.render('adminLogin', { title: 'Admin' });
+        res.render('index', { title: 'Admin' });
+    }
+
+    public adminLogout(req: Request, res: Response): void {
+        dao.tokenStore.delete(req.session.user?.email_address || '');
+        res.locals.pageBody = 'adminLogin';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminLogin view
+        res.render('index', { title: 'Admin' });
     }
 
     public async checkInAllBoats(req: Request, res: Response): Promise<void> {
         // TODO: Implement the logic for checking in all boats
         await dao.boatManager.checkInAllBoats();
-        res.status(200).json({ message: 'All boats checked in.' });
+        res.locals.task = "Check in all Boats";
+        res.locals.pageBody = 'taskComplete';
+        req.session.pageBody = res.locals.pageBody;
+        res.render('index', { title: 'Admin' });
     }
 
+  async deleteAdminUser(req: Request, res: Response): Promise<void> {
+    const email = req.body.email_address;
+    try {
+        await dao.adminPersonManager.deletePerson(email);
+        res.locals.task = "Delete Admin User";
+        res.locals.pageBody = 'taskComplete';
+        res.render('index', { title: 'Admin' });
+    } catch (error) {
+        console.error('Error deleting admin user:', error);
+        res.status(500).json({ error: 'Failed to delete admin user' });
+    }
+  }
+
+  
     async deleteAllUsers(req: Request, res: Response): Promise<void> {
         try {
             await dao.personManager.deleteAllPersons();
-            res.status(200).json({ message: 'All users deleted successfully.' });
+            res.locals.task = "Delete All Users";
+            res.locals.pageBody = 'taskComplete';
+            res.render('index', { title: 'Admin' });
         } catch (error) {
             console.error('Error deleting all users:', error);
             res.status(500).json({ error: 'Failed to delete all users' });
@@ -54,7 +110,7 @@ export class AdminController {
         res.locals.pageBody = 'adminPage';
         req.session.pageBody = res.locals.pageBody;
         // render the page1 view with the usernames 
-        res.render('adminPage', { title: 'Admin' });
+        res.render('index', { title: 'Admin' });
     }
 
     public async genLogReports(req: Request, res: Response): Promise<void> {
@@ -102,7 +158,7 @@ export class AdminController {
         // Set the page body in the session
         req.session.pageBody = res.locals.pageBody;
         // render the adminListUsers view
-        res.render('adminListUsers', { title: 'List Users', users: res.locals.users, error: res.locals.error });
+        res.render('index', { title: 'List Users', users: res.locals.users, error: res.locals.error });
     }
 
     // method to handle admin login
@@ -113,9 +169,14 @@ export class AdminController {
             const isValid = await admin?.validatePassword(password);
             if (isValid) {
                 // create a jwt token for the admin
-                const jwtBearerToken = jwt.sign({ isAdmin: true }, RSA_PRIVATE_KEY, {
+                const jwtBearerToken = jwt.sign({ user: admin, isAdmin: true }, RSA_PRIVATE_KEY, {
                     algorithm: 'RS256',
                 });
+                // Store the token in the token store
+                if (admin?.email_address) {
+                    dao.tokenStore.set(admin.email_address, jwtBearerToken);
+                }
+                // Send token to browser as a cookie
                 res.cookie('jwt', jwtBearerToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
                 this.getHome(req, res); // Render the admin home page         
             } else {

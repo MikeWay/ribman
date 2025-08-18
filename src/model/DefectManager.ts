@@ -50,32 +50,32 @@ export class DefectManager {
       
 
 
-    (async () => {
-        console.log("DefectManager example running...");
-        const manager = new DefectManager();
+    // (async () => {
+    //     console.log("DefectManager example running...");
+    //     const manager = new DefectManager();
     
-        // Example: Save defects for a boat
-        await manager.saveDefectsForBoat({
-            boatId: "boat123",
-            defects: [{
-                id: 1, description: "Broken rudder",
-                name: ""
-            }],
-            additionalInfo: "Urgent repair needed",
-            timestamp: Date.now(),
-            toItem: function (): { defects: DefectType[]; boatId: string; additionalInfo?: string; timestamp: number; } {
-                return {
-                    defects: this.defects,
-                    boatId: this.boatId,
-                    additionalInfo: this.additionalInfo,
-                    timestamp: this.timestamp
-                };
-            }
-        });
+    //     // Example: Save defects for a boat
+    //     await manager.saveDefectsForBoat({
+    //         boatId: "boat123",
+    //         defects: [{
+    //             id: 1, description: "Broken rudder",
+    //             name: ""
+    //         }],
+    //         additionalInfo: "Urgent repair needed",
+    //         timestamp: Date.now(),
+    //         toItem: function (): { defects: DefectType[]; boatId: string; additionalInfo?: string; timestamp: number; } {
+    //             return {
+    //                 defects: this.defects,
+    //                 boatId: this.boatId,
+    //                 additionalInfo: this.additionalInfo,
+    //                 timestamp: this.timestamp
+    //             };
+    //         }
+    //     });
     
-        // Example: Load defects for a boat
-        //const defects = await manager.loadDefectsForBoat("boat123");
-        //console.log(defects);
-    })();
+    //     // Example: Load defects for a boat
+    //     //const defects = await manager.loadDefectsForBoat("boat123");
+    //     //console.log(defects);
+    // })();
 
 

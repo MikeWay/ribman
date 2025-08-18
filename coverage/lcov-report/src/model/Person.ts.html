@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">8.33% </span>
+                <span class="strong">91.66% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>1/12</span>
+                <span class='fraction'>11/12</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>2/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">8.33% </span>
+                <span class="strong">91.66% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>1/12</span>
+                <span class='fraction'>11/12</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -155,13 +155,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -196,7 +196,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -204,8 +204,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">&nbsp;
 // Class representing a person in the system
@@ -219,7 +219,7 @@ export class Person {
     searchKey?: string; // Optional search key for quick lookups
 &nbsp;
 &nbsp;
-<span class="fstat-no" title="function not covered" >    constructor(</span>
+    constructor(
         id: string,
         firstName: string,
         lastName: string,
@@ -227,13 +227,13 @@ export class Person {
         birthDay: number,
         birthYear?: number  
     ) {
-<span class="cstat-no" title="statement not covered" >        this.id = id;</span>
-<span class="cstat-no" title="statement not covered" >        this.firstName = firstName;</span>
-<span class="cstat-no" title="statement not covered" >        this.lastName = lastName;</span>
-<span class="cstat-no" title="statement not covered" >        this.birthMonth = birthMonth;</span>
-<span class="cstat-no" title="statement not covered" >        this.birthDay = birthDay;</span>
-<span class="cstat-no" title="statement not covered" >        this.birthYear = birthYear;</span>
-<span class="cstat-no" title="statement not covered" >        this.searchKey = `${lastName.toLowerCase().charAt(0)}-${birthDay}-${birthMonth}`;</span>
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.birthMonth = birthMonth;
+        this.birthDay = birthDay;
+        this.birthYear = birthYear;
+        this.searchKey = `${lastName.toLowerCase().charAt(0)}-${birthDay}-${birthMonth}`;
     }
 &nbsp;
 &nbsp;
@@ -259,7 +259,7 @@ export class Person {
     }
 &nbsp;
     // Static method to create a Person instance from a DynamoDB item
-<span class="fstat-no" title="function not covered" >    static </span>fromItem(item: {
+    static fromItem(item: {
         id: string,
         firstName: string,
         lastName: string,
@@ -268,7 +268,7 @@ export class Person {
         birthYear?: number,
         search_key?: string,
     }): Person {
-        const person = <span class="cstat-no" title="statement not covered" >new Person(</span>
+        const person = new Person(
             item.id,
             item.firstName,
             item.lastName,
@@ -276,8 +276,8 @@ export class Person {
             item.birthDay,
             item.birthYear
         );
-<span class="cstat-no" title="statement not covered" >        person.searchKey = item.search_key;</span>
-<span class="cstat-no" title="statement not covered" >        return person;</span>
+        person.searchKey = item.search_key;
+        return person;
     }
 }</pre></td></tr></table></pre>
 
@@ -286,7 +286,7 @@ export class Person {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-08-17T06:48:47.158Z
+                at 2025-08-18T12:15:47.864Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

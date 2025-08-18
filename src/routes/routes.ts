@@ -10,12 +10,14 @@ import fs from 'fs';
 import path from 'path';
 import jwt from 'jsonwebtoken';
 import { Response, NextFunction } from 'express';
+import { AdminPerson } from '../model/AdminPerson';
+import { dao } from '../model/dao';
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 const absolutePath = path.resolve(__dirname, '../keys/public.key');
-console.log("Absolute path to public key:", absolutePath);
+//console.log("Absolute path to public key:", absolutePath);
 const RSA_PUBLIC_KEY = fs.readFileSync(absolutePath, 'utf8');
 
 const router = Router();
@@ -24,10 +26,12 @@ const router = Router();
 export function setRoutes(app: any) {
     app.use('/', router);
     //router.post('/navigate', navigationController.navigate.bind(navigationController));
-    router.get('/report', adminController.genLogReports.bind(adminController));
+    router.get('/admin/report', adminController.genLogReports.bind(adminController));
     router.get('/admin', checkIfAdminAuthenticated, adminController.getHome.bind(adminController));
-    router.post('/checkInAll', checkIfAdminAuthenticated, adminController.checkInAllBoats.bind(adminController));
+    router.post('/admin/checkInAll', checkIfAdminAuthenticated, adminController.checkInAllBoats.bind(adminController));
     router.get('/admin/listUsers', checkIfAdminAuthenticated, adminController.listUsers.bind(adminController));
+    router.get('/admin/add-admin-user', checkIfAdminAuthenticated, adminController.inputAddAdminUser.bind(adminController));
+    router.post('/admin/add-admin-user', checkIfAdminAuthenticated, adminController.saveNewAdminUser.bind(adminController));    
     router.get('/admin/set-password', checkIfAdminAuthenticated, adminController.inputAdminPassword.bind(adminController));
     router.post('/admin/set-password', checkIfAdminAuthenticated, adminController.setAdminPassword.bind(adminController));
     router.get('/admin/loadUsers', checkIfAdminAuthenticated, adminController.loadNewUsers.bind(adminController));
@@ -42,6 +46,8 @@ export function setRoutes(app: any) {
     router.post('/api/login', apiServer.login.bind(apiServer));
     router.get('/admin-login', adminController.adminLogin.bind(adminController));
     router.post('/admin/login', adminController.login.bind(adminController));
+    router.get('/admin/logout', adminController.adminLogout.bind(adminController));
+    router.post('/admin/delete-user', checkIfAdminAuthenticated, adminController.deleteAdminUser.bind(adminController));
 }
 
 
@@ -97,7 +103,7 @@ function checkIfAdminAuthenticated(
     if (!req.cookies) {
         console.log('Unauthorized: Cookies not found');
         throw new Error('NOT-ADMIN');
-        }
+        }// TODO invalidate the JWT token for this user
     const authCookie: string | undefined = req?.cookies['jwt'];
     if (!authCookie) {
         console.log('Unauthorized: JWT not found');
@@ -110,14 +116,25 @@ function checkIfAdminAuthenticated(
         (err, decoded) => {
             // decoded can be string | JwtPayload
             let isAdmin = false;
+            let user: AdminPerson | undefined = undefined;
             if (typeof decoded === 'object' && decoded !== null && 'isAdmin' in decoded) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 isAdmin = Boolean((decoded as any).isAdmin);
+                // extract the user information from the decoded token as an AdminPerson
+                user = (decoded as any).user as AdminPerson;
             }
-            if (err || !isAdmin) {
+            if (err || !isAdmin || !user) {
                 throw new Error('NOT-ADMIN');
                 //return res.status(403).json({ error: 'Forbidden' });
             }
+            if (user && user.email_address) {
+                if (!dao.tokenStore.has(user.email_address)) {
+                    console.error('Token not found in tokenStore:', authCookie);
+                    throw new Error('NOT-ADMIN');
+                }
+            }
+            // save user in the session
+            req.session.user = user;
             // If the token is valid and the user is an admin, proceed
             next();
         }

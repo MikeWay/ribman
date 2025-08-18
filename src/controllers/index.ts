@@ -20,7 +20,6 @@ export class IndexController {
 
         res.locals.pageBody = 'page1';
         req.session.pageBody = res.locals.pageBody;
-        // render the page1 view with the usernames 
         res.render('index', { title: 'Page 1' });
     }
 

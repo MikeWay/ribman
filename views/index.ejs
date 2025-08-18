@@ -2,89 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Admin Functions</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESC Boat Manager</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="/styles.css"> <!-- Link to the custom CSS file -->
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="container mt-5">
-    <h1 class="text-center">ESC Boat Checkout</h1>
-    <% if (typeof locals.message !== 'undefined') { %>
-        <h1 class="error"><%= message %></h1>
-    <% } %>
-    <%- include(pageBody) %>
-    <form action="/navigate" method="POST" class="d-flex justify-content-center gap-2 mt-4">
-        <button type="submit" name="action" value="previous" class="btn btn-primary">Previous</button>
-        <button type="submit" name="action" value="next" class="btn btn-success" onclick="addFormData(event)" id="nextButton" disabled>Next</button>
-        <script>
-            document.addEventListener('input', () => {
-            const nextButton = document.getElementById('nextButton');
-            if (nextButton) {
-                nextButton.disabled = !isValid();
-            }
-            });
-
-        </script>
-        <button type="button" class="btn btn-secondary" onclick="window.location.href='/'">Home</button>
-        <script>
-            function addFormData(event) {
-            try {
-                event.preventDefault();
-                const form = event.target.closest('form');
-                if (!form) {
-                throw new Error('Form element not found.');
-                }
-                const formData = getFormData();
-                if (!formData || typeof formData !== 'object') {
-                throw new Error('Invalid form data.');
-                }
-                // Include the value of the clicked button in the form data
-                const actionButton = event.target;
-                if (actionButton && actionButton.name && actionButton.value) {
-                formData[actionButton.name] = actionButton.value;
-                }
-                for (const key in formData) {
-                if (formData.hasOwnProperty(key)) {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = key;
-                    input.value = formData[key];
-                    form.appendChild(input);
-                }
-                }
-                form.submit();
-            } catch (error) {
-                console.error('Error in addFormData:', error.message);
-                alert('An error occurred while processing the form. Please try again.');
-            }
-            }
-
-            function getFormData() {
-            try {
-                const form = document.getElementById('theForm');
-                if (!form) {
-                throw new Error('Form with ID "theForm" not found.');
-                }
-                const formData = {};
-                const inputs = form.querySelectorAll('input, select, textarea');
-                inputs.forEach(input => {
-                if (input.type === 'radio') {
-                    if (input.checked) {
-                    formData[input.name] = input.value;
-                    }
-                } else if (input.id) {
-                    formData[input.name] = input.value;
-                }
-                });
-                return formData;
-            } catch (error) {
-                console.error('Error in getFormData:', error.message);
-                alert('An error occurred while retrieving form data.');
-                return null;
-            }
-            }
-        </script>
-    </form>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> <!-- Bootstrap JS -->
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h1 class="card-title mb-0">Boat Manager Admin Functions</h1>
+                            <a href="/admin/" class="btn btn-primary" title="Home">
+                                Home
+                            </a>
+                        </div>
+                        <% if (typeof locals.message !== 'undefined') { %>
+                            <div class="alert alert-danger" role="alert">
+                                <%= message %>
+                            </div>
+                        <% } %>
+                        <%- include(pageBody) %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap JS (optional, for interactive components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

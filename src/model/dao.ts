@@ -15,6 +15,8 @@ export class DataAccessObject {
     public logManager: LogManager; // Placeholder for LogManager, adjust as needed
     public defectManager: DefectManager;
     public adminPersonManager: AdminPersonManager; // Placeholder for admin person manager, adjust as needed
+    // Store JWT tokens for admin users by their id
+    public tokenStore: Map<string, string> = new Map();
 
     constructor() {
         // Initialize the boat manager and person manager
