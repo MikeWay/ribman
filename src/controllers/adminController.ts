@@ -31,7 +31,7 @@ export class AdminController {
         res.locals.pageBody = 'adminAddUser';
         req.session.pageBody = res.locals.pageBody;
         // render the adminAddUser view
-        res.render('adminAddUser', { title: 'Add Admin User' });
+        res.render('index', { title: 'Add Admin User' });
     }
 
     public async saveNewAdminUser(req: Request, res: Response): Promise<void> {
