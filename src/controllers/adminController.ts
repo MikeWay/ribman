@@ -45,6 +45,10 @@ export class AdminController {
         let engineHours: EngineHours[] = await dao.engineHoursManager.loadAllEngineHoursForAllBoats();
         let engineHoursMap = dao.engineHoursManager.mergeEngineHoursByReason(engineHours);
         res.locals.engineHoursMap = engineHoursMap;
+        const totalHours = engineHoursMap.values().reduce((sum: number, hours: number) => {
+            return sum + hours;
+        }, 0);
+        res.locals.totalEngineHours = totalHours;
 
         res.locals.pageBody = 'adminReportEngineHoursByUserGroup';
         req.session.pageBody = res.locals.pageBody;
@@ -54,6 +58,7 @@ export class AdminController {
 
     public async reportEngineHoursByUseByBoat(req: Request, res: Response): Promise<void> {
         const boatMap = new Map<string, EngineHours[]>();
+        const boatTotalsMap = new Map<string, number>();
         // Get a list of all the boats
         let boats: Boat[] = await dao.boatManager.listBoats();
         // for each boat
@@ -63,8 +68,14 @@ export class AdminController {
             let engineHoursMap = dao.engineHoursManager.mergeEngineHoursByReason(engineHours);
 
             boatMap.set(boat.name, engineHoursMap);
+
+            const totalHours = engineHoursMap.values().reduce((sum: number, hours: number) => {
+                return sum + hours;
+            }, 0);
+            boatTotalsMap.set(boat.name, totalHours);
         }
         res.locals.boatMap = boatMap;
+        res.locals.boatTotalsMap = boatTotalsMap;
         res.locals.pageBody = 'adminReportEngineHoursByUseByBoat';
         req.session.pageBody = res.locals.pageBody;
         // render the adminReportEngineHours view
