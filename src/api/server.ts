@@ -59,23 +59,26 @@ class ApiServer {
     const checkInByUser: Person = req.body.user;
     const defects: DefectType[] = req.body.problems || [];
     const additionalInfo: string = req.body.additionalInfo || '';
+    const engineHours: number = req.body.engineHours || 0;
+    const reason: string = boat.checkOutReason || 'No reason provided';
 
     try {
-      await dao.checkInBoat(boat, checkInByUser, defects, additionalInfo);
-        const logEntry = new LogEntry({
-            action: 'check in',
-            boatName: boat.name,
-            personName: checkInByUser.firstName + " " + checkInByUser.lastName,
-            checkOutDateTime: boat.checkedOutAt === null ? undefined : boat.checkedOutAt, // Assuming this is the time when the boat was checked out
-            checkInDateTime: Date.now(),
-            checkOutReason: boat.checkOutReason === null ? undefined : boat.checkOutReason,
-            defect: defects.map(d => d.name).join(', '), // Join defect names into a string
-            additionalInfo: additionalInfo || '',
-            logKey: `${boat.name}-${new Date().toISOString()}`
-        });
+      await dao.checkInBoat(boat, checkInByUser, defects, additionalInfo, engineHours, reason);
+      const logEntry = new LogEntry({
+        action: 'check in',
+        boatName: boat.name,
+        personName: checkInByUser.firstName + " " + checkInByUser.lastName,
+        checkOutDateTime: boat.checkedOutAt === null ? undefined : boat.checkedOutAt, // Assuming this is the time when the boat was checked out
+        checkInDateTime: Date.now(),
+        checkOutReason: boat.checkOutReason === null ? undefined : boat.checkOutReason,
+        defect: defects.map(d => d.name).join(', '), // Join defect names into a string
+        additionalInfo: additionalInfo || '',
+        engineHours: engineHours,
+        logKey: `${boat.name}-${new Date().toISOString()}`
+      });
 
-        // Save the log entry
-        dao.logManager.saveLogEntry(logEntry);      
+      // Save the log entry
+      dao.logManager.saveLogEntry(logEntry);
       return res.status(200).json({ message: "Boat checked in successfully" });
     } catch (error) {
       console.error("Error checking in boat:", error);
@@ -132,7 +135,7 @@ class ApiServer {
       console.error("Error fetching checked out boats:", error);
       return res.status(500).json({ error: "Failed to fetch checked out boats" });
     }
-  } 
+  }
 
   public async getPossibleDefectsList(req: Request, res: Response) {
     try {
@@ -148,29 +151,29 @@ class ApiServer {
   public login(req: Request, res: Response) {
 
     const email = req.body.email,
-          password = req.body.password;
+      password = req.body.password;
 
     if (validatePassword(password)) {
-       const userId = '666';
+      const userId = '666';
 
-        const jwtBearerToken = jwt.sign({}, RSA_PRIVATE_KEY, {
-                algorithm: 'RS256',
-                //expiresIn: 120,
-                subject: userId
-            });
+      const jwtBearerToken = jwt.sign({}, RSA_PRIVATE_KEY, {
+        algorithm: 'RS256',
+        //expiresIn: 120,
+        subject: userId
+      });
 
-          // send the JWT back to the user
-          res.status(200).json({
-            token: jwtBearerToken
-          });
-          console.log(`User ${userId} logged in successfully`);
-          // TODO - multiple options available                              
+      // send the JWT back to the user
+      res.status(200).json({
+        token: jwtBearerToken
+      });
+      console.log(`User ${userId} logged in successfully`);
+      // TODO - multiple options available                              
     }
     else {
-        // send status 401 Unauthorized
-        res.sendStatus(401); 
+      // send status 401 Unauthorized
+      res.sendStatus(401);
     }
-}
+  }
 
 }
 

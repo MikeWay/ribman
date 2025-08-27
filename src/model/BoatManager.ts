@@ -117,6 +117,14 @@ export class BoatManager {
     return true;
   }
 
+  async getBoatById(id: string): Promise<Boat | undefined> {
+    if (!id) {
+      return undefined;
+    }
+    const boatList = await this.listBoats();
+    return boatList.find(boat => boat.id === id);
+  }
+
   async getBoatByName(name: string): Promise<Boat | undefined> {
     if (!name) {
       return undefined;
@@ -140,7 +148,7 @@ export class BoatManager {
     }
   }
 
-  private async listBoats(): Promise<Boat[]> {
+  public async listBoats(): Promise<Boat[]> {
     const command = new ScanCommand({
       TableName: TABLE_NAME,
     });
@@ -154,7 +162,7 @@ export class BoatManager {
         return [];
       }
       // Ensure result.Items is an array before mapping
-      console.log(`Boats fetched: ${JSON.stringify(result.Items)}`);
+      //console.log(`Boats fetched: ${JSON.stringify(result.Items)}`);
       if (!Array.isArray(result.Items)) {
         console.warn('Result items are not an array:', result.Items);
         return [];

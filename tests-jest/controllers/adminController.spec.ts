@@ -252,11 +252,12 @@ describe('AdminController', () => {
     });
     it('should render adminAddUser page and set session pageBody', () => {
     controller.inputAddAdminUser(req, res);
-    expect(res.render.calledWith('adminAddUser', { title: 'Add Admin User' })).toBe(true);
+    expect(res.render.calledWith('index', { title: 'Add Admin User' })).toBe(true);
     expect(res.locals.pageBody).toEqual('adminAddUser');
     expect(req.session.pageBody).toEqual('adminAddUser');
 });
 });
+
 describe('AdminController.saveNewAdminUser', () => {
     let req: any;
     let res: any;

@@ -48,6 +48,12 @@ export function setRoutes(app: any) {
     router.post('/admin/login', adminController.login.bind(adminController));
     router.get('/admin/logout', adminController.adminLogout.bind(adminController));
     router.post('/admin/delete-user', checkIfAdminAuthenticated, adminController.deleteAdminUser.bind(adminController));
+    router.get('/admin/boatsWithIssues', checkIfAdminAuthenticated, adminController.boatsWithIssues.bind(adminController));
+    router.get('/admin/defectsForBoat/:boatId', checkIfAdminAuthenticated, adminController.defectsForBoat.bind(adminController));
+    router.get('/admin/engineHoursForBoat/:boatId', checkIfAdminAuthenticated, adminController.reportEngineHoursForBoat.bind(adminController));
+    router.get('/admin/engineHours', checkIfAdminAuthenticated, adminController.reportEngineHours.bind(adminController));
+    router.get('/admin/engineHoursByUse', checkIfAdminAuthenticated, adminController.reportEngineHoursByUserGroup.bind(adminController));
+    router.get('/admin/engineHoursByUseByBoat', checkIfAdminAuthenticated, adminController.reportEngineHoursByUseByBoat.bind(adminController));
 }
 
 

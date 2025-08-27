@@ -48,21 +48,37 @@ describe('ApiServer', () => {
 
     describe('checkInBoat', () => {
         it('should check in a boat and save log', async () => {
-            jest.spyOn(dao, 'checkInBoat').mockResolvedValue(undefined);
-            jest.spyOn(dao.logManager, 'saveLogEntry').mockResolvedValue(undefined);
+            const checkInBoatSpy = jest.spyOn(dao, 'checkInBoat').mockResolvedValue(undefined);
+            const saveLogEntrySpy = jest.spyOn(dao.logManager, 'saveLogEntry').mockResolvedValue(undefined);
 
             req.body = {
                 boat: { name: 'Boat1', checkedOutAt: null, checkOutReason: null } as Boat,
                 user: { firstName: 'Alice', lastName: 'Smith' } as Person,
                 problems: [{ name: 'Leak' } as DefectType],
-                additionalInfo: 'info'
+                additionalInfo: 'info',
+                engineHours: 100,
+                reason: 'Routine check'
             };
 
             await apiServer.checkInBoat(req as Request, res as Response);
 
             expect(statusMock).toHaveBeenCalledWith(200);
             expect(jsonMock).toHaveBeenCalledWith(expect.objectContaining({ message: 'Boat checked in successfully' }));
+            const logArg = saveLogEntrySpy.mock.calls[0][0]; // Check the log entry saved
+            expect(logArg.boatName).toBe(req.body.boat.name);
+            expect(logArg.personName).toBe(req.body.user.firstName + " " + req.body.user.lastName);
+            expect(logArg.checkInDateTime).toBeDefined();
+            expect(logArg.engineHours).toBe(req.body.engineHours);
+
+
+            expect(checkInBoatSpy.mock.calls[0][0]).toBe(req.body.boat);
+            expect(checkInBoatSpy.mock.calls[0][1]).toBe(req.body.user);
+            expect(checkInBoatSpy.mock.calls[0][2]).toBe(req.body.problems);
+            expect(checkInBoatSpy.mock.calls[0][3]).toBe(req.body.additionalInfo);
+            expect(checkInBoatSpy.mock.calls[0][4]).toBe(req.body.engineHours);
+            expect(checkInBoatSpy.mock.calls[0][5]).toBe(req.body.reason);
         });
+
 
         it('should handle errors', async () => {
             jest.spyOn(dao, 'checkInBoat').mockRejectedValue(new Error('fail'));

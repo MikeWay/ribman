@@ -1,0 +1,22 @@
+<table class="table table-striped table-bordered">
+    <thead class="thead-dark"></thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th># Issues</th>
+            <th>&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% boatsWithIssues.forEach(function(boat, index) { %>
+            <tr>
+                <td><%= boat.id %></td>
+                <td><%= boat.name %></td>
+                <td><%= boat.defects.defects.length %></td>
+                <td>
+                    <a href="/admin/defectsForBoat/<%= boat.id %>" class="btn btn-primary btn-sm">View Issues</a>
+                </td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>

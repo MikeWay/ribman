@@ -6,6 +6,8 @@ import { RSA_PRIVATE_KEY } from "../api/server";
 import jwt from 'jsonwebtoken';
 import { LogEntry } from "../model/log";
 import { AdminPerson } from "../model/AdminPerson";
+import { EngineHours } from "../model/EngineHours";
+import { Boat } from "../model/Boat";
 
 // Extend Express Request type to include file property
 interface MulterRequest extends Request {
@@ -26,6 +28,68 @@ declare module 'express-session' {
 
 
 export class AdminController {
+
+    public async reportEngineHours(req: Request, res: Response): Promise<void> {
+        // load engine hours for all boats
+        let engineHours: EngineHours[] = await dao.engineHoursManager.loadAllEngineHoursForAllBoats();
+        engineHours = dao.engineHoursManager.sortEngineHoursByReason(engineHours);
+        res.locals.engineHours = engineHours;
+        res.locals.pageBody = 'adminReportEngineHours';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminReportEngineHours view
+        res.render('index', { title: 'Admin - Report Engine Hours' });
+    }
+
+    public async reportEngineHoursByUserGroup(req: Request, res: Response): Promise<void> {
+        // load engine hours for all boats
+        let engineHours: EngineHours[] = await dao.engineHoursManager.loadAllEngineHoursForAllBoats();
+        let engineHoursMap = dao.engineHoursManager.mergeEngineHoursByReason(engineHours);
+        res.locals.engineHoursMap = engineHoursMap;
+
+        res.locals.pageBody = 'adminReportEngineHoursByUserGroup';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminReportEngineHours view
+        res.render('index', { title: 'Admin - Report Engine Hours by User Group' });
+    }
+
+    public async reportEngineHoursByUseByBoat(req: Request, res: Response): Promise<void> {
+        const boatMap = new Map<string, EngineHours[]>();
+        // Get a list of all the boats
+        let boats: Boat[] = await dao.boatManager.listBoats();
+        // for each boat
+        for (const boat of boats) {
+            // load engine hours for all boats
+            let engineHours: EngineHours[] = await dao.engineHoursManager.getEngineHoursByBoatId(boat.id);
+            let engineHoursMap = dao.engineHoursManager.mergeEngineHoursByReason(engineHours);
+
+            boatMap.set(boat.name, engineHoursMap);
+        }
+        res.locals.boatMap = boatMap;
+        res.locals.pageBody = 'adminReportEngineHoursByUseByBoat';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminReportEngineHours view
+        res.render('index', { title: 'Admin - Report Engine Hours by Use Group' });
+    }
+
+    public async reportEngineHoursForBoat(req: Request, res: Response): Promise<void> {
+        // load engine hours for specifc boat
+    }
+
+    public async defectsForBoat(req: Request, res: Response): Promise<void> {
+        const boatId = req.params.boatId || req.url.split('/').pop();
+        if (!boatId) {
+            res.status(400).render('error', { title: 'Defects for Boat', error: 'Boat ID is required' });
+            return;
+        }
+        const defects = await dao.defectManager.loadDefectsForBoat(boatId);
+        const boat = await dao.boatManager.getBoatById(boatId);
+        res.locals.defects = defects;
+        res.locals.boat = boat;
+        res.locals.pageBody = 'adminDefectsForBoat';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminDefectsForBoat view
+        res.render('index', { title: 'Defects for Boat', defects: res.locals.defects });
+    }
 
     public inputAddAdminUser(req: Request, res: Response): any {
         res.locals.pageBody = 'adminAddUser';
@@ -69,6 +133,20 @@ export class AdminController {
         req.session.pageBody = res.locals.pageBody;
         // render the adminLogin view
         res.render('index', { title: 'Admin' });
+    }
+
+    public async boatsWithIssues(req: Request, res: Response): Promise<void> {
+        const boatsWithIssues = await dao.identifyBoatsWithIssues();
+        res.locals.boatsWithIssues = boatsWithIssues;
+        res.locals.pageBody = 'adminBoatsWithIssues';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminBoatsWithIssues view
+        try {
+            res.render('index', { title: 'Admin - Boats with Issues' });
+        } catch (error) {
+            console.error('Error rendering adminBoatsWithIssues view:', error);
+            res.status(500).render('error', { title: 'Admin - Boats with Issues', error: 'Failed to render view' });
+        }
     }
 
     public async checkInAllBoats(req: Request, res: Response): Promise<void> {

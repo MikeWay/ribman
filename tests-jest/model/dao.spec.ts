@@ -62,4 +62,77 @@ describe('DataAccessObject', () => {
             expect(defects[0].name).toBe('Engine failure');
         });
     });
+describe('getBoatDefectStatus', () => {
+    it('should throw error if boat is not found', async () => {
+        (dao.boatManager.getBoatByName as jest.Mock).mockResolvedValue(null);
+        await expect(dao.getBoatDefectStatus('NonExistentBoat')).rejects.toThrow('Boat with name NonExistentBoat not found');
+    });
+
+    it('should return defects for the found boat', async () => {
+        const mockBoat = { id: 'boat123', name: 'TestBoat' } as Boat;
+        const mockDefects = new DefectsForBoat([new DefectType(1, 'Engine failure', 'The engine is not starting')], mockBoat.id, 'info', Date.now());
+        (dao.boatManager.getBoatByName as jest.Mock).mockResolvedValue(mockBoat);
+        (dao.defectManager.loadDefectsForBoat as jest.Mock).mockResolvedValue(mockDefects);
+
+        const result = await dao.getBoatDefectStatus('TestBoat');
+        expect(result).toBe(mockDefects);
+        expect(dao.boatManager.getBoatByName).toHaveBeenCalledWith('TestBoat');
+        expect(dao.defectManager.loadDefectsForBoat).toHaveBeenCalledWith(mockBoat.id);
+    });
+
+    it('should return null if no defects are found for the boat', async () => {
+        const mockBoat = { id: 'boat456', name: 'BoatNoDefects' } as Boat;
+        (dao.boatManager.getBoatByName as jest.Mock).mockResolvedValue(mockBoat);
+        (dao.defectManager.loadDefectsForBoat as jest.Mock).mockResolvedValue(null);
+
+        const result = await dao.getBoatDefectStatus('BoatNoDefects');
+        expect(result).toBeNull();
+        expect(dao.boatManager.getBoatByName).toHaveBeenCalledWith('BoatNoDefects');
+        expect(dao.defectManager.loadDefectsForBoat).toHaveBeenCalledWith(mockBoat.id);
+    });
+});
+describe('identifyBoatsWithIssues', () => {
+    it('should return boats that have defects', async () => {
+        const boat1 = { id: 'boat1', name: 'Boat1' } as Boat;
+        const boat2 = { id: 'boat2', name: 'Boat2' } as Boat;
+        const boat3 = { id: 'boat3', name: 'Boat3' } as Boat;
+
+        (dao.boatManager.listBoats as jest.Mock).mockResolvedValue([boat1, boat2, boat3]);
+        (dao.defectManager.loadDefectsForBoat as jest.Mock)
+            .mockResolvedValueOnce(new DefectsForBoat([new DefectType(1, 'Engine failure', 'desc')], boat1.id, '', Date.now()))
+            .mockResolvedValueOnce(null)
+            .mockResolvedValueOnce(new DefectsForBoat([new DefectType(2, 'Hull damage', 'desc')], boat3.id, '', Date.now()));
+
+        const result = await dao.identifyBoatsWithIssues();
+        expect(result).toEqual([boat1, boat3]);
+        expect(dao.boatManager.listBoats).toHaveBeenCalled();
+        expect(dao.defectManager.loadDefectsForBoat).toHaveBeenCalledTimes(3);
+        expect(dao.defectManager.loadDefectsForBoat).toHaveBeenCalledWith(boat1.id);
+        expect(dao.defectManager.loadDefectsForBoat).toHaveBeenCalledWith(boat2.id);
+        expect(dao.defectManager.loadDefectsForBoat).toHaveBeenCalledWith(boat3.id);
+    });
+
+    it('should return an empty array if no boats have defects', async () => {
+        const boat1 = { id: 'boat1', name: 'Boat1' } as Boat;
+        const boat2 = { id: 'boat2', name: 'Boat2' } as Boat;
+
+        (dao.boatManager.listBoats as jest.Mock).mockResolvedValue([boat1, boat2]);
+        (dao.defectManager.loadDefectsForBoat as jest.Mock)
+            .mockResolvedValueOnce(null)
+            .mockResolvedValueOnce(null);
+
+        const result = await dao.identifyBoatsWithIssues();
+        expect(result).toEqual([]);
+        expect(dao.boatManager.listBoats).toHaveBeenCalled();
+        expect(dao.defectManager.loadDefectsForBoat).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return an empty array if there are no boats', async () => {
+        (dao.boatManager.listBoats as jest.Mock).mockResolvedValue([]);
+        const result = await dao.identifyBoatsWithIssues();
+        expect(result).toEqual([]);
+        expect(dao.boatManager.listBoats).toHaveBeenCalled();
+        expect(dao.defectManager.loadDefectsForBoat).not.toHaveBeenCalled();
+    });
+});
 });

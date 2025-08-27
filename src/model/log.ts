@@ -24,6 +24,7 @@ export class LogEntry implements LogEntryItem {
     checkOutReason?: string;
     defect?: string;
     additionalInfo?: string;
+    engineHours?: number;
 
     constructor(init: Partial<LogEntry>) {
         Object.assign(this, init);
@@ -49,6 +50,7 @@ export class LogEntry implements LogEntryItem {
         defect: string;
         additionalInfo?: string;
         action?: string;
+        engineHours?: number;
     } {
         return {
             logKey: this.logKey,
@@ -59,13 +61,15 @@ export class LogEntry implements LogEntryItem {
             checkOutReason: this.checkOutReason ? this.checkOutReason : "",
             defect: this.defect ? this.defect : "",
             additionalInfo: this.additionalInfo ? this.additionalInfo : "",
-            action: this.action,    
+            action: this.action,
+            engineHours: this.engineHours
         };
     }
     public toString(): string {
         return `LogEntry: Boat Name: ${this.boatName}, Person Name: ${this.personName}, 
         Check Out DateTime: ${this.checkOutDateTime}, Check In DateTime: ${this.checkInDateTime}, 
         Check Out Reason: ${this.checkOutReason}, Defect: ${this.defect ? this.defect : 'No Defect'}, 
-        Additional Info: ${this.additionalInfo ? this.additionalInfo : 'No Additional Info'}`;
+        Additional Info: ${this.additionalInfo ? this.additionalInfo : 'No Additional Info'},
+        Engine Hours: ${this.engineHours ? this.engineHours : 0}`;
     }
 }

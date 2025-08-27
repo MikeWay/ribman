@@ -4,6 +4,8 @@ import session from 'express-session';
 import { setRoutes } from '../src/routes/routes';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import { dao } from '../src/model/dao';
+
 
 jest.mock('../src/routes/routes', () => ({
   setRoutes: jest.fn((app) => {
@@ -90,7 +92,7 @@ describe('server.ts', () => {
       .set('Content-Type', 'application/x-www-form-urlencoded');
     expect(res.body.received).toEqual({ foo: 'bar' });
   });
-
+ 
   // it('should set session', async () => {
   //   app.get('/session', (req, res) => {
   //     req.session.test = 'value';

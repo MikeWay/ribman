@@ -1,3 +1,4 @@
+import { DefectsForBoat } from "./defect";
 import { Person } from "./Person";
 
 
@@ -10,6 +11,16 @@ export class Boat {
     checkedOutAt: number | null = null;
     checkedInAt: number | null = null;
     checkOutReason: string | null = null;
+    private _defects: DefectsForBoat | null = null; // Not directly saved or loaded
+
+    get defects(): DefectsForBoat | null {
+        return this._defects;
+    }
+
+    set defects(defects: DefectsForBoat | null) {
+        this._defects = defects;
+    }
+
     constructor(id: string, name: string, isAvailable: boolean = true, checkedOutTo?: Person | null, checkedOutAt?: number | null, checkedInAt?: number | null, checkOutReason?: string | null) {
         this.id = id;
         this.name = name;

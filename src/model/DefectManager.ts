@@ -1,7 +1,7 @@
 import { DynamoDBClient, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { DefectsForBoat, DefectType } from "./defect";
 
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { Config } from "./Config";
 import { environment } from "../environment";
 
@@ -10,8 +10,8 @@ const REGION = Config.getInstance().get('region');
 
 export class DefectManager {
 
-      private client = new DynamoDBClient({ region: REGION });
-  private ddbDocClient = DynamoDBDocumentClient.from(this.client);
+    private client = new DynamoDBClient({ region: REGION });
+    private ddbDocClient = DynamoDBDocumentClient.from(this.client);
   
     public async saveDefectsForBoat(defectsForBoat: DefectsForBoat): Promise<void> {
         // Implement the logic to save defects for a specific boat
@@ -25,25 +25,44 @@ export class DefectManager {
         await this.ddbDocClient.send(command);
     }
 
-    // load defects for a specific boat
+    // load defects for a specific boatexpect.any(QueryCommand)
     public async loadDefectsForBoat(boatId: string): Promise<DefectsForBoat | null> {
-        const command = new GetItemCommand({
+        // const command = new GetItemCommand({
+        //     TableName: TABLE_NAME,
+        //     Key: {
+        //         boatId: { S: boatId }
+        //     }
+        // });
+
+        const scanCommand = new ScanCommand({
             TableName: TABLE_NAME,
-            Key: {
-                boatId: { S: boatId }
+            FilterExpression: "boatId = :boatId",
+            ExpressionAttributeValues: {
+                ":boatId": boatId
             }
         });
-
-        const result = await this.ddbDocClient.send(command);
-        if (result.Item) {
+        const scanResult = await this.ddbDocClient.send(scanCommand);
+        if (scanResult.Items && scanResult.Items.length > 0) {
+            const item = scanResult.Items[0];
             return new DefectsForBoat(
-                JSON.parse(result.Item.defects.S ?? "[]"),
-                result.Item.boatId.S ?? "",
-                result.Item.additionalInfo?.S ?? "",
-                result.Item.timestamp?.N ? parseInt(result.Item.timestamp.N) : Date.now()
+                item.defects,
+                item.boatId ?? "",
+                item.additionalInfo ?? "",
+                item.timestamp ? parseInt(item.timestamp) : Date.now()
             );
         }
         return null;
+
+        // const result = await this.ddbDocClient.send(command);
+        // if (result.Item) {
+        //     return new DefectsForBoat(
+        //         JSON.parse(result.Item.defects.S ?? "[]"),
+        //         result.Item.boatId.S ?? "",
+        //         result.Item.additionalInfo?.S ?? "",
+        //         result.Item.timestamp?.N ? parseInt(result.Item.timestamp.N) : Date.now()
+        //     );
+        // }
+        // return null;
     }
 }
 
@@ -67,7 +86,7 @@ export class DefectManager {
     //             return {
     //                 defects: this.defects,
     //                 boatId: this.boatId,
-    //                 additionalInfo: this.additionalInfo,
+    //                 additionalInfo: this.additionalInfo,expect.any(QueryCommand)
     //                 timestamp: this.timestamp
     //             };
     //         }

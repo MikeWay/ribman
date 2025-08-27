@@ -1,0 +1,38 @@
+<%
+// Assuming locals.defect is available and is of type DefectsForBoat
+const defect = locals.defect;
+%>
+
+<h2>Defect Details</h2>
+<ul>
+    <li><strong>ID:</strong> <%= defects.boatId %></li>
+    <li><strong>Boat Name:</strong> <%= boat.name %></li>
+    <li>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Defect Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% defects.defects.forEach(function(def, idx) { %>
+                    <tr>
+                        <td><%= def.name %></td>
+                        <td>
+                            <a href="/admin/defectCleared?defectId=<%= def.id %>&boatId=<%= defects.boatId %>" 
+                                class="btn btn-success" 
+                                onclick="return confirm('Are you sure you want to mark this defect as cleared?');">
+                                Cleared
+                            </a>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </li>
+    <li><strong>Additional Info:</strong> <%= defects.additionalInfo %></li>
+    <li><strong>Status:</strong> <%= defects.status %></li>
+    <li><strong>Reported By:</strong> <%= defects.reportedBy %></li>
+    <li><strong>Date Reported:</strong> <%= defects.dateReported %></li>
+</ul>
