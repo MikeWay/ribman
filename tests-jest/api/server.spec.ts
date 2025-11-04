@@ -29,7 +29,7 @@ describe('ApiServer', () => {
 
     describe('checkPerson', () => {
         it('should return found people', async () => {
-            const people = [ new Person('1', 'John', 'Doe', 6, 12 ) ];
+            const people = [new Person('1', 'John', 'Doe', 6, 12)];
             jest.spyOn(dao.personManager, 'getPersonByLastNameAndBirthDate').mockResolvedValue(people);
 
             req.body = { familyInitial: 'Doe', day: 1, month: 2, year: 2000 };
@@ -48,16 +48,16 @@ describe('ApiServer', () => {
 
     describe('checkInBoat', () => {
         it('should check in a boat and save log', async () => {
+            const checkOutReason = 'Sailability';
             const checkInBoatSpy = jest.spyOn(dao, 'checkInBoat').mockResolvedValue(undefined);
             const saveLogEntrySpy = jest.spyOn(dao.logManager, 'saveLogEntry').mockResolvedValue(undefined);
 
             req.body = {
-                boat: { name: 'Boat1', checkedOutAt: null, checkOutReason: null } as Boat,
+                boat: { name: 'Boat1', checkedOutAt: null, checkOutReason: checkOutReason } as Boat,
                 user: { firstName: 'Alice', lastName: 'Smith' } as Person,
                 problems: [{ name: 'Leak' } as DefectType],
                 additionalInfo: 'info',
                 engineHours: 100,
-                reason: 'Routine check'
             };
 
             await apiServer.checkInBoat(req as Request, res as Response);
@@ -76,11 +76,19 @@ describe('ApiServer', () => {
             expect(checkInBoatSpy.mock.calls[0][2]).toBe(req.body.problems);
             expect(checkInBoatSpy.mock.calls[0][3]).toBe(req.body.additionalInfo);
             expect(checkInBoatSpy.mock.calls[0][4]).toBe(req.body.engineHours);
-            expect(checkInBoatSpy.mock.calls[0][5]).toBe(req.body.reason);
+            expect(checkInBoatSpy.mock.calls[0][5]).toBe(checkOutReason);
         });
 
 
         it('should handle errors', async () => {
+            req.body = {
+                boat: { name: 'Boat1', checkedOutAt: null, checkOutReason: null } as Boat,
+                user: { firstName: 'Alice', lastName: 'Smith' } as Person,
+                problems: [{ name: 'Leak' } as DefectType],
+                additionalInfo: 'info',
+                engineHours: 100,
+                reason: 'Routine check'
+            };
             jest.spyOn(dao, 'checkInBoat').mockRejectedValue(new Error('fail'));
             await apiServer.checkInBoat(req as Request, res as Response);
             expect(statusMock).toHaveBeenCalledWith(500);
@@ -115,7 +123,7 @@ describe('ApiServer', () => {
 
     describe('getAvailableBoats', () => {
         it('should return available boats', async () => {
-            const boats = [ new Boat('1', 'BoatA', true, null) ];
+            const boats = [new Boat('1', 'BoatA', true, null)];
             jest.spyOn(dao.boatManager, 'getAvailableBoats').mockResolvedValue(boats as Boat[]);
 
             await apiServer.getAvailableBoats(req as Request, res as Response);
@@ -134,7 +142,7 @@ describe('ApiServer', () => {
 
     describe('getCheckedOutBoats', () => {
         it('should return checked out boats', async () => {
-            const boats = [ new Boat('2', 'BoatB', false, null)];
+            const boats = [new Boat('2', 'BoatB', false, null)];
             jest.spyOn(dao.boatManager, 'getCheckedOutBoats').mockResolvedValue(boats);
 
             await apiServer.getCheckedOutBoats(req as Request, res as Response);

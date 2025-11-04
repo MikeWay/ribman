@@ -8,6 +8,7 @@ import { LogEntry } from "../model/log";
 import { AdminPerson } from "../model/AdminPerson";
 import { EngineHours } from "../model/EngineHours";
 import { Boat } from "../model/Boat";
+import { DefectsForBoat } from "../model/defect";
 
 // Extend Express Request type to include file property
 interface MulterRequest extends Request {
@@ -28,108 +29,6 @@ declare module 'express-session' {
 
 
 export class AdminController {
-
-    public async reportEngineHours(req: Request, res: Response): Promise<void> {
-        // load engine hours for all boats
-        let engineHours: EngineHours[] = await dao.engineHoursManager.loadAllEngineHoursForAllBoats();
-        engineHours = dao.engineHoursManager.sortEngineHoursByReason(engineHours);
-        res.locals.engineHours = engineHours;
-        res.locals.pageBody = 'adminReportEngineHours';
-        req.session.pageBody = res.locals.pageBody;
-        // render the adminReportEngineHours view
-        res.render('index', { title: 'Admin - Report Engine Hours' });
-    }
-
-    public async reportEngineHoursByUserGroup(req: Request, res: Response): Promise<void> {
-        // load engine hours for all boats
-        let engineHours: EngineHours[] = await dao.engineHoursManager.loadAllEngineHoursForAllBoats();
-        let engineHoursMap = dao.engineHoursManager.mergeEngineHoursByReason(engineHours);
-        res.locals.engineHoursMap = engineHoursMap;
-        const totalHours = engineHoursMap.values().reduce((sum: number, hours: number) => {
-            return sum + hours;
-        }, 0);
-        res.locals.totalEngineHours = totalHours;
-
-        res.locals.pageBody = 'adminReportEngineHoursByUserGroup';
-        req.session.pageBody = res.locals.pageBody;
-        // render the adminReportEngineHours view
-        res.render('index', { title: 'Admin - Report Engine Hours by User Group' });
-    }
-
-    public async reportEngineHoursByUseByBoat(req: Request, res: Response): Promise<void> {
-        const boatMap = new Map<string, EngineHours[]>();
-        const boatTotalsMap = new Map<string, number>();
-        // Get a list of all the boats
-        let boats: Boat[] = await dao.boatManager.listBoats();
-        // for each boat
-        for (const boat of boats) {
-            // load engine hours for all boats
-            let engineHours: EngineHours[] = await dao.engineHoursManager.getEngineHoursByBoatId(boat.id);
-            let engineHoursMap = dao.engineHoursManager.mergeEngineHoursByReason(engineHours);
-
-            boatMap.set(boat.name, engineHoursMap);
-
-            const totalHours = engineHoursMap.values().reduce((sum: number, hours: number) => {
-                return sum + hours;
-            }, 0);
-            boatTotalsMap.set(boat.name, totalHours);
-        }
-        res.locals.boatMap = boatMap;
-        res.locals.boatTotalsMap = boatTotalsMap;
-        res.locals.pageBody = 'adminReportEngineHoursByUseByBoat';
-        req.session.pageBody = res.locals.pageBody;
-        // render the adminReportEngineHours view
-        res.render('index', { title: 'Admin - Report Engine Hours by Use Group' });
-    }
-
-    public async reportEngineHoursForBoat(req: Request, res: Response): Promise<void> {
-        // load engine hours for specifc boat
-    }
-
-    public async defectsForBoat(req: Request, res: Response): Promise<void> {
-        const boatId = req.params.boatId || req.url.split('/').pop();
-        if (!boatId) {
-            res.status(400).render('error', { title: 'Defects for Boat', error: 'Boat ID is required' });
-            return;
-        }
-        const defects = await dao.defectManager.loadDefectsForBoat(boatId);
-        const boat = await dao.boatManager.getBoatById(boatId);
-        res.locals.defects = defects;
-        res.locals.boat = boat;
-        res.locals.pageBody = 'adminDefectsForBoat';
-        req.session.pageBody = res.locals.pageBody;
-        // render the adminDefectsForBoat view
-        res.render('index', { title: 'Defects for Boat', defects: res.locals.defects });
-    }
-
-    public inputAddAdminUser(req: Request, res: Response): any {
-        res.locals.pageBody = 'adminAddUser';
-        req.session.pageBody = res.locals.pageBody;
-        // render the adminAddUser view
-        res.render('index', { title: 'Add Admin User' });
-    }
-
-    public async saveNewAdminUser(req: Request, res: Response): Promise<void> {
-        // Implement the logic to save a new admin user
-        const firstName = req.body.firstName;
-        const lastName = req.body.lastName;
-        const email = req.body.email;
-        const password = req.body.password;
-        try {
-
-            const newUser = new AdminPerson(email, firstName, lastName);
-            await newUser.setPassword(password); // setPassword hashes the password
-            await dao.adminPersonManager.saveAdminPerson(newUser);
-            res.redirect('/admin/listUsers');
-        } catch (error) {
-            console.error('Error creating admin user:', error);
-            res.render('error', { title: 'Add Admin User', error: 'Failed to create admin user' });
-        }
-    }
-
-    constructor() {
-        // Initialization code if needed
-    }
 
     public adminLogin(req: Request, res: Response): void {
         res.locals.pageBody = 'adminLogin';
@@ -169,20 +68,83 @@ export class AdminController {
         res.render('index', { title: 'Admin' });
     }
 
-  async deleteAdminUser(req: Request, res: Response): Promise<void> {
-    const email = req.body.email_address;
-    try {
-        await dao.adminPersonManager.deletePerson(email);
-        res.locals.task = "Delete Admin User";
+    public async clearAllBoatFaults(req: Request, res: Response): Promise<void> {
+        await dao.defectManager.clearAllBoatFaults();
+        res.locals.task = "Clear all Boat Faults";
         res.locals.pageBody = 'taskComplete';
+        req.session.pageBody = res.locals.pageBody;
         res.render('index', { title: 'Admin' });
-    } catch (error) {
-        console.error('Error deleting admin user:', error);
-        res.status(500).json({ error: 'Failed to delete admin user' });
     }
-  }
 
-  
+    public async confirmDefectCleared(req: Request, res: Response): Promise<void> {
+        const { defectId, boatId, confirm } = req.body;
+        req.params.boatId = boatId;
+        
+        if (confirm === 'yes') {
+            console.log(`Defect confirmed cleared: ${defectId} for boat: ${boatId}`);
+            // TODO Implement the logic to perform the defect clearance
+            const defectsForBoat: DefectsForBoat | null = await dao.defectManager.loadDefectsForBoat(boatId);
+            defectsForBoat?.clearDefect(defectId);
+            if(defectsForBoat && !defectsForBoat.hasDefects()) {
+                dao.defectManager.deleteDefectsForBoat(defectsForBoat);
+            } else {
+                await dao.defectManager.saveDefectsForBoat(defectsForBoat!);
+            }
+
+            //defectsForBoat?.clearDefect(defectId);
+        } else {
+            console.log(`Defect clearance cancelled: ${defectId} for boat: ${boatId}`);
+        }
+        this.defectsForBoat(req, res);
+    }
+
+    public checkIfDefectToBeCleared(req: Request, res: Response): void {
+        const { reportedDefectId, boatId, defectName } = req.body;
+        // Implement the logic to mark the defect as cleared
+        console.log(`Defect cleared: ${reportedDefectId} for boat: ${boatId}`);
+        res.locals.defectId = reportedDefectId;
+        res.locals.boatId = boatId;
+        res.locals.task = "Defect Cleared";
+        res.locals.pageBody = 'confirmDefectCleared';
+        res.locals.defectName = defectName;
+        req.session.pageBody = res.locals.pageBody;
+        res.render('index', { title: 'Admin' });
+    }
+
+    public async defectsForBoat(req: Request, res: Response): Promise<void> {
+        const boatId = req.params.boatId || req.url.split('/').pop();
+        if (!boatId) {
+            res.status(400).render('error', { title: 'Defects for Boat', error: 'Boat ID is required' });
+            return;
+        }
+        const defectsForBoat: DefectsForBoat | null = await dao.defectManager.loadDefectsForBoat(boatId);
+        if (!defectsForBoat) {
+            this.boatsWithIssues(req, res);
+            return;
+        }
+        const boat = await dao.boatManager.getBoatById(boatId);
+        res.locals.defectsForBoat = defectsForBoat;
+        res.locals.boat = boat;
+        res.locals.pageBody = 'adminDefectsForBoat';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminDefectsForBoat view
+        //console.log("Rendering defectsForBoat view for boatId:", boatId, "defectsForBoat:", JSON.stringify(defectsForBoat));
+        res.render('index', { title: 'Defects for Boat', defectsForBoat: res.locals.defectsForBoat });
+    }
+
+    async deleteAdminUser(req: Request, res: Response): Promise<void> {
+        const email = req.body.email_address;
+        try {
+            await dao.adminPersonManager.deletePerson(email);
+            res.locals.task = "Delete Admin User";
+            res.locals.pageBody = 'taskComplete';
+            res.render('index', { title: 'Admin' });
+        } catch (error) {
+            console.error('Error deleting admin user:', error);
+            res.status(500).json({ error: 'Failed to delete admin user' });
+        }
+    }
+
     async deleteAllUsers(req: Request, res: Response): Promise<void> {
         try {
             await dao.personManager.deleteAllPersons();
@@ -235,6 +197,22 @@ export class AdminController {
         }
     }
 
+    public inputAddAdminUser(req: Request, res: Response): any {
+        res.locals.pageBody = 'adminAddUser';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminAddUser view
+        res.render('index', { title: 'Add Admin User' });
+    }
+
+    public async inputAdminPassword(req: Request, res: Response): Promise<void> {
+        const { email_address } = req.query as { email_address: string };
+        const admin = await dao.adminPersonManager.getAdminByEmail(email_address);
+        // Set the page body in the session
+        req.session.pageBody = res.locals.pageBody;
+        //res.render('adminSetPassword', { title: 'Set Admin Password', email_address });
+        res.render('adminSetPassword', { title: 'Set Admin Password', email_address, user: admin, error: null });
+    }
+
     public async listUsers(req: Request, res: Response): Promise<void> {
         try {
             res.locals.pageBody = 'adminListUsers';
@@ -283,14 +261,80 @@ export class AdminController {
         // render the adminLoadUsers view
         res.render('index', { title: 'Load Users' });
     }
-    public async inputAdminPassword(req: Request, res: Response): Promise<void> {
 
-        const { email_address } = req.query as { email_address: string };
-        const admin = await dao.adminPersonManager.getAdminByEmail(email_address);
-        // Set the page body in the session
+    public async reportEngineHours(req: Request, res: Response): Promise<void> {
+        // load engine hours for all boats
+        let engineHours: EngineHours[] = await dao.engineHoursManager.loadAllEngineHoursForAllBoats();
+        engineHours = dao.engineHoursManager.sortEngineHoursByReason(engineHours);
+        res.locals.engineHours = engineHours;
+        res.locals.pageBody = 'adminReportEngineHours';
         req.session.pageBody = res.locals.pageBody;
-        //res.render('adminSetPassword', { title: 'Set Admin Password', email_address });
-        res.render('adminSetPassword', { title: 'Set Admin Password', email_address, user: admin, error: null });
+        // render the adminReportEngineHours view
+        res.render('index', { title: 'Admin - Report Engine Hours' });
+    }
+
+    public async reportEngineHoursByUseByBoat(req: Request, res: Response): Promise<void> {
+        const boatMap = new Map<string, EngineHours[]>();
+        const boatTotalsMap = new Map<string, number>();
+        // Get a list of all the boats
+        let boats: Boat[] = await dao.boatManager.listBoats();
+        // for each boat
+        for (const boat of boats) {
+            // load engine hours for all boats
+            let engineHours: EngineHours[] = await dao.engineHoursManager.getEngineHoursByBoatId(boat.id);
+            let engineHoursMap = dao.engineHoursManager.mergeEngineHoursByReason(engineHours);
+
+            boatMap.set(boat.name, engineHoursMap);
+
+            const totalHours = engineHoursMap.values().reduce((sum: number, hours: number) => {
+                return sum + hours;
+            }, 0);
+            boatTotalsMap.set(boat.name, totalHours);
+        }
+        res.locals.boatMap = boatMap;
+        res.locals.boatTotalsMap = boatTotalsMap;
+        res.locals.pageBody = 'adminReportEngineHoursByUseByBoat';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminReportEngineHours view
+        res.render('index', { title: 'Admin - Report Engine Hours by Use Group' });
+    }
+
+    public async reportEngineHoursByUserGroup(req: Request, res: Response): Promise<void> {
+        // load engine hours for all boats
+        let engineHours: EngineHours[] = await dao.engineHoursManager.loadAllEngineHoursForAllBoats();
+        let engineHoursMap = dao.engineHoursManager.mergeEngineHoursByReason(engineHours);
+        res.locals.engineHoursMap = engineHoursMap;
+        const totalHours = engineHoursMap.values().reduce((sum: number, hours: number) => {
+            return sum + hours;
+        }, 0);
+        res.locals.totalEngineHours = totalHours;
+
+        res.locals.pageBody = 'adminReportEngineHoursByUserGroup';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminReportEngineHours view
+        res.render('index', { title: 'Admin - Report Engine Hours by User Group' });
+    }
+
+    public async reportEngineHoursForBoat(req: Request, res: Response): Promise<void> {
+        // load engine hours for specifc boat
+    }
+
+    public async saveNewAdminUser(req: Request, res: Response): Promise<void> {
+        // Implement the logic to save a new admin user
+        const firstName = req.body.firstName;
+        const lastName = req.body.lastName;
+        const email = req.body.email;
+        const password = req.body.password;
+        try {
+
+            const newUser = new AdminPerson(email, firstName, lastName);
+            await newUser.setPassword(password); // setPassword hashes the password
+            await dao.adminPersonManager.saveAdminPerson(newUser);
+            res.redirect('/admin/listUsers');
+        } catch (error) {
+            console.error('Error creating admin user:', error);
+            res.render('error', { title: 'Add Admin User', error: 'Failed to create admin user' });
+        }
     }
 
     public async setAdminPassword(req: Request, res: Response): Promise<void> {

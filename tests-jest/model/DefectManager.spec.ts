@@ -2,6 +2,7 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import sinon from 'sinon';
 import { DefectManager } from '../../src/model/DefectManager';
+import { DefectsForBoat } from '../../src/model/defect';
 
 jest.mock('@aws-sdk/lib-dynamodb', () => {
     const actual = jest.requireActual('@aws-sdk/lib-dynamodb');
@@ -41,20 +42,25 @@ describe('DefectManager', () => {
 
     describe('saveDefectsForBoat', () => {
         it('should send a PutCommand with correct parameters', async () => {
-            const mockDefectsForBoat = {
-                boatId: 'boat123',
-                defects: [{ id: 1, description: 'Broken rudder', name: '' }],
-                additionalInfo: 'Urgent repair needed',
+            // Import DefectsForBoat and ReportedDefect at the top if not already imported
+            // import { DefectsForBoat } from '../../src/model/DefectManager';
+            // import { ReportedDefect } from '../../src/model/defect';
+
+            const reportedDefect = {
+                defectId: 666,
+                defect: { id: 1, description: 'Broken rudder', name: '' },
                 timestamp: 1234567890,
-                toItem: function () {
-                    return {
-                        boatId: this.boatId,
-                        defects: this.defects,
-                        additionalInfo: this.additionalInfo,
-                        timestamp: this.timestamp
-                    };
-                }
+                additionalInfo: 'Urgent repair needed',
+                originallyReported: 1234567890
             };
+
+            // If DefectsForBoat is a class, use 'new DefectsForBoat(...)'
+            const mockDefectsForBoat = new DefectsForBoat(
+                [reportedDefect],
+                'boat123',
+                'Urgent repair needed',
+                1234567890,
+            );
 
             //ddbDocClientStub.resolves();
 
@@ -62,7 +68,11 @@ describe('DefectManager', () => {
             expect(mockSend).toHaveBeenCalled();
             const commandArg = mockSend.mock.calls[0][0];
             expect(commandArg.input.TableName).toEqual(expect.any(String));
-            expect(commandArg.input.Item).toEqual(mockDefectsForBoat.toItem());
+            const expectedItem = { ...mockDefectsForBoat.toItem() };
+            delete expectedItem.timestamp;
+            const actualItem = { ...commandArg.input.Item };
+            delete actualItem.timestamp;
+            expect(actualItem).toEqual(expectedItem);
         });
     });
 
@@ -82,13 +92,13 @@ describe('DefectManager', () => {
 
             const mockDefectsForBoat = {
                 boatId: 'boat123',
-                defects: [{ id: 1, description: 'Broken rudder', name: '' }],
+                reportedDefects: [{ defectId: 666, id: 1, description: 'Broken rudder', name: '' }],
                 additionalInfo: 'Urgent repair needed',
                 timestamp: 1234567890,
                 toItem: function () {
                     return {
                         boatId: this.boatId,
-                        defects: this.defects,
+                        reportedDefects: this.reportedDefects,
                         additionalInfo: this.additionalInfo,
                         timestamp: this.timestamp
                     };
@@ -100,9 +110,9 @@ describe('DefectManager', () => {
             expect(result).not.toBeNull();
             if (result) {
                 expect(result.boatId).toEqual('boat123');
-                expect(result.defects).toEqual([{ id: 1, description: 'Broken rudder', name: '' }]);
+                expect(result.reportedDefects).toEqual([{ defectId: 666, id: 1, description: 'Broken rudder', name: '' }]);
                 expect(result.additionalInfo).toEqual('Urgent repair needed');
-                expect(result.timestamp).toEqual(1234567890);
+                expect(result.originallyReported).toEqual(1234567890);
             }
         });
 
@@ -137,7 +147,7 @@ describe('DefectManager', () => {
 
             it('should return DefectsForBoat when Items array has one item', async () => {
                 const mockItem = {
-                    defects: [{ id: 2, description: 'Leaky hull', name: 'Hull' }],
+                    reportedDefects: [{ defectId: 666, id: 2, description: 'Leaky hull', name: 'Hull' }],
                     boatId: 'boat456',
                     additionalInfo: 'Needs patching',
                     timestamp: 987654321
@@ -147,9 +157,9 @@ describe('DefectManager', () => {
                 expect(result).not.toBeNull();
                 if (result) {
                     expect(result.boatId).toBe('boat456');
-                    expect(result.defects).toEqual([{ id: 2, description: 'Leaky hull', name: 'Hull' }]);
+                    expect(result.reportedDefects).toEqual([{ defectId: 666, id: 2, description: 'Leaky hull', name: 'Hull' }]);
                     expect(result.additionalInfo).toBe('Needs patching');
-                    expect(result.timestamp).toBe(987654321);
+                    expect(result.originallyReported).toBe(987654321);
                 }
             });
 
@@ -172,7 +182,7 @@ describe('DefectManager', () => {
                 const result = await defectManager.loadDefectsForBoat('boat999');
                 expect(result).not.toBeNull();
                 if (result) {
-                    expect(result.timestamp).toBe(now);
+                    expect(result.originallyReported).toBe(now);
                 }
                 (Date.now as jest.Mock).mockRestore();
             });

@@ -14,8 +14,9 @@ describe('EngineHours', () => {
 
     it('should convert to item object', () => {
         const engineHours = new EngineHours(boatId, hours, reason);
+        const time = engineHours.timestamp;
         const item = engineHours.toItem();
-        expect(item).toEqual({ boatId, hours, reason });
+        expect(item).toEqual({ boatId, hours, reason, timestamp: time });
     });
 
     it('should create an instance from item object', () => {

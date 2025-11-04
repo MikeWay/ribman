@@ -1,6 +1,6 @@
 import { EngineHoursManager } from '../../src/model/EngineHoursManager';
 import { EngineHours } from '../../src/model/EngineHours';
-import { DynamoDBClient, QueryCommand,  } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, QueryCommand, ScanCommand,  } from "@aws-sdk/client-dynamodb";
 import {  PutCommand } from "@aws-sdk/lib-dynamodb";
 
 
@@ -23,7 +23,8 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
 
 jest.mock('@aws-sdk/client-dynamodb', () => ({
     DynamoDBClient: jest.fn(),
-    QueryCommand: jest.fn()
+    QueryCommand: jest.fn(),
+    ScanCommand: jest.fn(),
 }));
 
 describe('EngineHoursManager', () => {
@@ -88,6 +89,20 @@ describe('EngineHoursManager', () => {
 
 it('should load all engine hours for all boats', async () => {
     const items = [
+        {
+            boatId: { S: 'boat-123' },
+            hours: { N: '100' },
+            date: { S: '2024-06-01' },
+            reason: { S: 'Maintenance' }
+        },
+        {
+            boatId: { S: 'boat-456' },
+            hours: { N: '200' },
+            date: { S: '2024-06-02' },
+            reason: { S: 'Repair' }
+        }
+    ];    
+    const unmarshalledItems = [
         { boatId: 'boat-123', hours: 100, date: '2024-06-01', reason: 'Maintenance' },
         { boatId: 'boat-456', hours: 200, date: '2024-06-02', reason: 'Repair' }
     ];
@@ -101,7 +116,7 @@ it('should load all engine hours for all boats', async () => {
 
     expect(sendMock).toHaveBeenCalled();
     expect(fromItemSpy).toHaveBeenCalledTimes(items.length);
-    expect(result).toEqual(items);
+    expect(result).toEqual(unmarshalledItems);
 
     fromItemSpy.mockRestore();
 });

@@ -54,6 +54,9 @@ export function setRoutes(app: any) {
     router.get('/admin/engineHours', checkIfAdminAuthenticated, adminController.reportEngineHours.bind(adminController));
     router.get('/admin/engineHoursByUse', checkIfAdminAuthenticated, adminController.reportEngineHoursByUserGroup.bind(adminController));
     router.get('/admin/engineHoursByUseByBoat', checkIfAdminAuthenticated, adminController.reportEngineHoursByUseByBoat.bind(adminController));
+    router.post('/admin/checkIfDefectToBeCleared', checkIfAdminAuthenticated, adminController.checkIfDefectToBeCleared.bind(adminController));
+    router.post('/admin/confirmDefectCleared', checkIfAdminAuthenticated, adminController.confirmDefectCleared.bind(adminController));
+    router.post('/admin/clearAllBoatFaults', checkIfAdminAuthenticated, adminController.clearAllBoatFaults.bind(adminController));
 }
 
 

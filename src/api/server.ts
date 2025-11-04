@@ -11,7 +11,7 @@ console.log("Current directory:", __dirname);
 // convert the relative path to an absolute path
 import path from 'path';
 import { LogEntry } from "../model/log";
-import { DefectType } from "../model/defect";
+import { DefectType, ReportedDefect } from "../model/defect";
 const absolutePath = path.resolve(__dirname, '../keys/private.key');
 //console.log("Absolute path to private key:", absolutePath);
 export const RSA_PRIVATE_KEY = fs.readFileSync(absolutePath, 'utf8');
@@ -57,13 +57,13 @@ class ApiServer {
   public async checkInBoat(req: Request, res: Response) {
     const boat: Boat = req.body.boat;
     const checkInByUser: Person = req.body.user;
-    const defects: DefectType[] = req.body.problems || [];
-    const additionalInfo: string = req.body.additionalInfo || '';
+    const defects: ReportedDefect[] = req.body.problems || [];
+    //const additionalInfo: string = req.body.additionalInfo || '';
     const engineHours: number = req.body.engineHours || 0;
     const reason: string = boat.checkOutReason || 'No reason provided';
 
     try {
-      await dao.checkInBoat(boat, checkInByUser, defects, additionalInfo, engineHours, reason);
+      await dao.checkInBoat(boat, checkInByUser, defects, engineHours, reason);
       const logEntry = new LogEntry({
         action: 'check in',
         boatName: boat.name,
@@ -71,8 +71,8 @@ class ApiServer {
         checkOutDateTime: boat.checkedOutAt === null ? undefined : boat.checkedOutAt, // Assuming this is the time when the boat was checked out
         checkInDateTime: Date.now(),
         checkOutReason: boat.checkOutReason === null ? undefined : boat.checkOutReason,
-        defect: defects.map(d => d.name).join(', '), // Join defect names into a string
-        additionalInfo: additionalInfo || '',
+        defect: defects.map(d => d.defectType.name).join(', '), // Join defect names into a string
+        additionalInfo: defects.map(d => d.additionalInfo).join(', '),
         engineHours: engineHours,
         logKey: `${boat.name}-${new Date().toISOString()}`
       });

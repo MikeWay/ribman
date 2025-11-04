@@ -1,6 +1,6 @@
 import { Boat } from "./Boat";
 import { BoatManager } from "./BoatManager";
-import { DefectsForBoat, DefectType } from "./defect";
+import { DefectsForBoat, DefectType, ReportedDefect } from "./defect";
 import { LogEntry } from "./log";
 import { LogManager, logManager } from "./LogManager";
 import { Person } from "./Person";
@@ -34,7 +34,7 @@ export class DataAccessObject {
     
 
 
-    public async checkInBoat(boat: Boat, checkInByUser: Person, defects: DefectType[], additionalInfo?: string, engineHours?: number, reason?: string): Promise<void>    {
+    public async checkInBoat(boat: Boat, checkInByUser: Person, defects: ReportedDefect[], engineHours?: number, reason?: string): Promise<void>    {
         if (!boat || !checkInByUser) {
             throw new Error("Boat and user must be provided for check-in.");
         }
@@ -46,13 +46,43 @@ export class DataAccessObject {
         boat.isAvailable = true;
 
         // Save the defects to dynamodb
-        const defectsForBoat = new DefectsForBoat(defects,  boat.id, additionalInfo, checkInDateTime );
+        // Need to fetch the existing defects and merge them with the latest ones.
+        // 
+        const existingDefects = await this.defectManager.loadDefectsForBoat(boat.id);
+        const mergedDefects: ReportedDefect[] = this.mergeDefects(existingDefects, defects );
+        const defectsForBoat = new DefectsForBoat(mergedDefects,  boat.id, checkInDateTime, existingDefects? existingDefects.timestamp : Date.now() );
         await this.defectManager.saveDefectsForBoat(defectsForBoat);
         await this.engineHoursManager.saveEngineHours(new EngineHours(boat.id, engineHours || 0, reason ?? ""));
         // Save the updated boat
         return this.boatManager.saveBoat(Boat.fromItem(boat));
       throw new Error("Method not implemented.");
-    }    
+    }
+
+    private mergeDefects(existingDefects: DefectsForBoat | null, defects: ReportedDefect[]) : ReportedDefect[] {
+        if (!existingDefects) {
+            // If no existing defects, just create new reported defects
+            return defects.map(defect => new ReportedDefect(defect.defectType, Date.now(), defect.additionalInfo));
+        }
+
+        // Merge existing defects with new ones
+        const merged: ReportedDefect[] = [...existingDefects.reportedDefects];
+
+        for (const defect of defects) {
+            // Check if the defect already exists
+            const existing = merged.find(d => d.defectType.id === defect.defectType.id);
+            if (existing) {
+                // If it exists, update the additional info
+                existing.additionalInfo = existing.additionalInfo
+                    ? `${existing.additionalInfo}; ${defect.additionalInfo}`
+                    : defect.additionalInfo;
+            } else {
+                // If it doesn't exist, add it as a new reported defect
+                merged.push(new ReportedDefect(defect.defectType, Date.now(), defect.additionalInfo));
+            }
+        }
+
+        return merged;
+    }
 
     public getPossibleDefectsList(): DefectType[] {
         return [
@@ -64,7 +94,8 @@ export class DataAccessObject {
             new DefectType(6, 'Steering malfunction', 'The steering is not working properly'),
             new DefectType(7, 'Navigation system failure', 'The navigation system is not working'),
             new DefectType(8, 'Safety equipment missing', 'Safety equipment is not on board'),
-            new DefectType(9, 'Weather-related issues', 'Weather conditions are affecting the boat')
+            new DefectType(9, 'Weather-related issues', 'Weather conditions are affecting the boat'),
+            new DefectType(10, 'Other', 'Other unspecified issues')
         ];
     }
 

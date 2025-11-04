@@ -1,7 +1,7 @@
 import { DataAccessObject } from '../../src/model/dao';
 import { Boat } from '../../src/model/Boat';
 import { Person } from '../../src/model/Person';
-import { DefectType, DefectsForBoat } from '../../src/model/defect';
+import { DefectType, DefectsForBoat, ReportedDefect } from '../../src/model/defect';
 import { BoatManager } from '../../src/model/BoatManager';
 import { PersonManager } from '../../src/model/PersonManager';
 import { LogManager } from '../../src/model/LogManager';
@@ -70,7 +70,12 @@ describe('getBoatDefectStatus', () => {
 
     it('should return defects for the found boat', async () => {
         const mockBoat = { id: 'boat123', name: 'TestBoat' } as Boat;
-        const mockDefects = new DefectsForBoat([new DefectType(1, 'Engine failure', 'The engine is not starting')], mockBoat.id, 'info', Date.now());
+        const reportedDefect = new ReportedDefect(
+            new DefectType(1, 'Engine failure', 'The engine is not starting'),
+            Date.now(),
+            'info'
+        );
+        const mockDefects = new DefectsForBoat([reportedDefect], mockBoat.id, 'info', Date.now());
         (dao.boatManager.getBoatByName as jest.Mock).mockResolvedValue(mockBoat);
         (dao.defectManager.loadDefectsForBoat as jest.Mock).mockResolvedValue(mockDefects);
 
@@ -99,9 +104,9 @@ describe('identifyBoatsWithIssues', () => {
 
         (dao.boatManager.listBoats as jest.Mock).mockResolvedValue([boat1, boat2, boat3]);
         (dao.defectManager.loadDefectsForBoat as jest.Mock)
-            .mockResolvedValueOnce(new DefectsForBoat([new DefectType(1, 'Engine failure', 'desc')], boat1.id, '', Date.now()))
+            .mockResolvedValueOnce(new DefectsForBoat([new ReportedDefect(new DefectType(1, 'Engine failure', 'desc'), Date.now(), 'desc')], boat1.id, '', Date.now()))
             .mockResolvedValueOnce(null)
-            .mockResolvedValueOnce(new DefectsForBoat([new DefectType(2, 'Hull damage', 'desc')], boat3.id, '', Date.now()));
+            .mockResolvedValueOnce(new DefectsForBoat([new ReportedDefect(new DefectType(2, 'Hull damage', 'desc'), Date.now(), 'desc')], boat3.id, '', Date.now()));
 
         const result = await dao.identifyBoatsWithIssues();
         expect(result).toEqual([boat1, boat3]);
@@ -133,6 +138,73 @@ describe('identifyBoatsWithIssues', () => {
         expect(result).toEqual([]);
         expect(dao.boatManager.listBoats).toHaveBeenCalled();
         expect(dao.defectManager.loadDefectsForBoat).not.toHaveBeenCalled();
+    });
+});
+describe('mergeDefects', () => {
+    let dao: DataAccessObject;
+    const additionalInfo = 'Some additional info';
+
+    beforeEach(() => {
+        dao = new DataAccessObject();
+    });
+
+    it('should create new reported defects if no existing defects', () => {
+        const defects = [
+            new DefectType(1, 'Engine failure', 'Engine not starting'),
+            new DefectType(2, 'Hull damage', 'Crack in hull')
+        ];
+        const result = (dao as any).mergeDefects(null, defects, additionalInfo);
+        expect(result).toHaveLength(2);
+        expect(result[0].defect.id).toBe(1);
+        expect(result[0].defect.name).toBe('Engine failure');
+        expect(result[0].additionalInfo).toBe(additionalInfo);
+        expect(result[1].defect.id).toBe(2);
+        expect(result[1].defect.name).toBe('Hull damage');
+        expect(result[1].additionalInfo).toBe(additionalInfo);
+    });
+
+    it('should merge new defects with existing defects', () => {
+        const existingDefectType = new DefectType(1, 'Engine failure', 'Old engine issue');
+        const existingReportedDefect = new ReportedDefect(existingDefectType, Date.now(), 'Old info');
+        const existingDefects = new DefectsForBoat([existingReportedDefect], 'boat1', '', Date.now());
+
+        const newDefectType = new DefectType(2, 'Hull damage', 'New hull crack');
+        const result = (dao as any).mergeDefects(existingDefects, [newDefectType], additionalInfo);
+        expect(result).toHaveLength(2);
+        expect(result[0].defect.id).toBe(1);
+        expect(result[1].defect.id).toBe(2);
+        expect(result[1].additionalInfo).toBe(additionalInfo);
+    });
+
+    it('should update additionalInfo if defect already exists', () => {
+        const defectType = new DefectType(1, 'Engine failure', 'Old engine issue');
+        const reportedDefect = new ReportedDefect(defectType, Date.now(), 'Old info');
+        const existingDefects = new DefectsForBoat([reportedDefect], 'boat1', '', Date.now());
+
+        const updatedDefectType = new DefectType(1, 'Engine failure', 'New engine issue');
+        const result = (dao as any).mergeDefects(existingDefects, [updatedDefectType]);
+        expect(result).toHaveLength(1);
+        expect(result[0].defect.id).toBe(1);
+        expect(result[0].additionalInfo).toContain('Old info');
+        expect(result[0].additionalInfo).toContain('New engine issue');
+    });
+
+    it('should add multiple new defects and update existing ones', () => {
+        const defectType1 = new DefectType(1, 'Engine failure', 'Old engine issue');
+        const defectType2 = new DefectType(2, 'Hull damage', 'Old hull issue');
+        const reportedDefect1 = new ReportedDefect(defectType1, Date.now(), 'Old info 1');
+        const reportedDefect2 = new ReportedDefect(defectType2, Date.now(), 'Old info 2');
+        const existingDefects = new DefectsForBoat([reportedDefect1, reportedDefect2], 'boat1', '', Date.now());
+
+        const newDefectType1 = new DefectType(1, 'Engine failure', 'New engine issue');
+        const newDefectType3 = new DefectType(3, 'Propeller problem', 'Propeller broken');
+        const result = (dao as any).mergeDefects(existingDefects, [newDefectType1, newDefectType3], additionalInfo);
+        expect(result).toHaveLength(3);
+        const updatedDefect = result.find((d: { defect: { id: number; }; }) => d.defect.id === 1);
+        expect(updatedDefect?.additionalInfo).toContain('Old info 1');
+        expect(updatedDefect?.additionalInfo).toContain('New engine issue');
+        const newDefect = result.find((d: { defect: { id: number; }; }) => d.defect.id === 3);
+        expect(newDefect?.additionalInfo).toBe(additionalInfo);
     });
 });
 });
