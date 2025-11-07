@@ -37,6 +37,7 @@ export class EngineHoursManager {
     }
 
     async loadAllEngineHoursForAllBoats(): Promise<EngineHours[]> {
+        console.log("Loading all engine hours for all boats using table:", TABLE_NAME);
         const params = {
             TableName: TABLE_NAME
         };
