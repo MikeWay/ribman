@@ -59,6 +59,21 @@ export class AdminController {
         }
     }
 
+
+    public async boatsCheckedOut(req: Request, res: Response): Promise<void> {
+        const boatsCheckedOut = await dao.boatManager.getCheckedOutBoats();
+        res.locals.boatsCheckedOut = boatsCheckedOut;
+        res.locals.pageBody = 'adminBoatsCheckedOut';
+        req.session.pageBody = res.locals.pageBody;
+        // render the adminBoatsCheckedOut view
+        try {
+            res.render('index', { title: 'Admin - Boats Checked Out' });
+        } catch (error) {
+            console.error('Error rendering adminBoatsCheckedOut view:', error);
+            res.status(500).render('error', { title: 'Admin - Boats Checked Out', error: 'Failed to render view' });
+        }
+    }
+
     public async checkInAllBoats(req: Request, res: Response): Promise<void> {
         // TODO: Implement the logic for checking in all boats
         await dao.boatManager.checkInAllBoats();
