@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc && cp src/keys/* dist/keys",
-    "build:prod": "tsc -p tsconfig.prod.json && cp src/keys/* dist/keys",
+    "build:prod": "tsc -p tsconfig.prod.json && cp src/keys/* dist/keys && rm dist/environment.js && mv dist/environment.prod.js dist/environment.js",
     "start": "cp src/keys/* dist/keys && node dist/server.js",
     "dev": "cp src/keys/* dist/keys && ts-node src/server.ts",
     "devbuild": "cp src/keys/* dist/keys && tsc -p tsconfig.json && ts-node src/server.ts",
